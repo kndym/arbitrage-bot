@@ -4,12 +4,13 @@ from py_clob_client.client import ClobClient
 from py_clob_client.clob_types import ApiCreds
 from dotenv import load_dotenv
 from py_clob_client.constants import POLYGON
+import pprint
 
 load_dotenv()
 
 
 def main():
-    host = "https://clob.polymarket.com"
+    host = "wss://ws-subscriptions-clob.polymarket.com/ws/user"
     key = os.getenv("PK")
     creds = ApiCreds(
         api_key=os.getenv("CLOB_API_KEY"),
@@ -26,8 +27,17 @@ def main():
     while next_cursor!="LTE=":
         resp = client.get_sampling_markets(next_cursor=next_cursor)
         for data in resp["data"]:
-            if data["active"] and not data["closed"] and data["accepting_orders"]:
-                print(data['question'])
+            if False:
+                if data["active"] and not data["closed"] and data["accepting_orders"]:
+                    if any(x in data["tags"] for x in ['NBA Playoffs']):
+                        print(data['question'], data["tags"])
+                        pprint.pp(data)
+                        break
+            else:
+                if "braves" in data["market_slug"]:
+                    print(data['question'], data["tags"])
+                    pprint.pp(data)
+
         print('     NEXT PAGE')
         next_cursor=resp['next_cursor']
 
