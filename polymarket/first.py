@@ -13,7 +13,7 @@ def main():
     chain_id = 137
     client = ClobClient(host, key=key, chain_id=chain_id)
 
-    print(client.create_api_key())
+    #print(client.create_api_key())
 
 
 main()

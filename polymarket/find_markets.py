@@ -11,4 +11,5 @@ for x in range(3):
     for event in response:
         if any( x in event["slug"] for x in ["nba", "mlb", "nhl"]):
             print(event["slug"])
-            #print(event["markets"][0]["clobTokenIds"])
+            print(event["markets"][0]["clobTokenIds"])
+ 
