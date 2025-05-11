@@ -121,10 +121,10 @@ if True:
             cursor=response["cursor"]
             #pprint.pp(response["events"][0])
             for event in response["events"]:
-                if "Sports"in event["category"]:
+                if "Minnesota vs Golden State"in event["title"]:
                     pprint.pp(event["title"])
                     for market in event["markets"]:
-                        print(market["yes_sub_title"])
+                        pprint.pp(market)
             if cursor=="":
                 break
         
