@@ -8,12 +8,15 @@ from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.exceptions import InvalidSignature
 from clients import KalshiHttpClient, KalshiWebSocketClient, Environment
 import pprint
+import requests
+import datetime
 
 # Load environment variables
 load_dotenv()
-env = Environment.DEMO # toggle environment here
+env = Environment.PROD # toggle environment here
 KEYID = os.getenv('DEMO_KEYID') if env == Environment.DEMO else os.getenv('PROD_KEYID')
 KEYFILE = os.getenv('DEMO_KEYFILE') if env == Environment.DEMO else os.getenv('PROD_KEYFILE')
+BASE_URL = 'https://api.elections.kalshi.com'
 
 try:
     with open(KEYFILE, "rb") as key_file:
@@ -44,6 +47,7 @@ def sign_pss_text(private_key: rsa.RSAPrivateKey, text: str) -> str:
     except InvalidSignature as e:
         raise ValueError("RSA sign PSS failed") from e
 
+
 # Initialize the HTTP client
 client = KalshiHttpClient(
     key_id=KEYID,
@@ -51,40 +55,21 @@ client = KalshiHttpClient(
     environment=env
 )
 
-# Get account balance
-balance = client.get_balance()
-print("Balance:", balance)
-
-if False:
-    # Initialize the WebSocket client
-    ws_client = KalshiWebSocketClient(
-        key_id=KEYID,
-        private_key=private_key,
-        environment=env
-    )
-    
-    # Connect via WebSocket
-    asyncio.run(ws_client.connect())
 
 
-import requests
-import datetime
 
-if True:
+def get_headers():
     # Get the current time
     current_time = datetime.datetime.now()
 
     # Convert the time to a timestamp (seconds since the epoch)
     timestamp = current_time.timestamp()
-
     # Convert the timestamp to milliseconds
     current_time_milliseconds = int(timestamp * 1000)
     timestampt_str = str(current_time_milliseconds)
 
     method = "GET"
-    base_url = 'https://api.elections.kalshi.com'
     path='/trade-api/v2/portfolio/balance'
-
 
     msg_string = timestampt_str + method + path
 
@@ -95,36 +80,26 @@ if True:
             'KALSHI-ACCESS-SIGNATURE': sig,
             'KALSHI-ACCESS-TIMESTAMP': timestampt_str
         }
-    if False:
-        response = requests.get(base_url + path, headers=headers)
-        print("Status Code:", response.status_code)
-        print("Response Body:", response.text)
-    if False:
-        headers = {"accept": "application/json"}
+    return headers
 
-        path_2="/trade-api/v2/events"
+def find_markets(title_string):
+    cursor=""
+    for x in range(100):
+        headers = {"accept": "application/json",
+                    }
 
-        response = requests.get(base_url + path_2, headers=headers)
+        path_2=f"/trade-api/v2/events?limit=200&status=open&with_nested_markets=true&cursor={cursor}"
 
-        pprint.pp(response.text)
-    if True:
-        cursor=""
-        for x in range(100):
-            headers = {"accept": "application/json",
-                        }
+        r = requests.get(BASE_URL + path_2, headers=headers)
+        response=r.json()
+        #pprint.pp(response)
+        cursor=response["cursor"]
+        #pprint.pp(response["events"][0])
+        for event in response["events"]:
+            if title_string in event["title"]:
+                pprint.pp(event["title"])
+                for market in event["markets"]:
+                    pprint.pp(market)
+        if cursor=="":
+            break
 
-            path_2=f"/trade-api/v2/events?limit=200&status=open&with_nested_markets=true&cursor={cursor}"
-
-            r = requests.get(base_url + path_2, headers=headers)
-            response=r.json()
-            #pprint.pp(response)
-            cursor=response["cursor"]
-            #pprint.pp(response["events"][0])
-            for event in response["events"]:
-                if "Minnesota vs Golden State"in event["title"]:
-                    pprint.pp(event["title"])
-                    for market in event["markets"]:
-                        pprint.pp(market)
-            if cursor=="":
-                break
-        

@@ -13,10 +13,13 @@ from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.exceptions import InvalidSignature
 
 import websockets
+import pprint
+
 
 class Environment(Enum):
     DEMO = "demo"
     PROD = "prod"
+
 
 class KalshiBaseClient:
     """Base client class for interacting with the Kalshi API."""
@@ -185,19 +188,31 @@ class KalshiWebSocketClient(KalshiBaseClient):
         self.url_suffix = "/trade-api/ws/v2"
         self.message_id = 1  # Add counter for message IDs
 
-    async def connect(self):
+    async def connect(self, ticker_list):
         """Establishes a WebSocket connection using authentication."""
         host = self.WS_BASE_URL + self.url_suffix
         auth_headers = self.request_headers("GET", self.url_suffix)
-        async with websockets.connect(host, additional_headers=auth_headers) as websocket:
-            self.ws = websocket
-            await self.on_open()
-            await self.handler()
+        self.ticker_list=ticker_list
+
+        # The async with block keeps the connection open as long as the code inside is running
+        try:
+            async with websockets.connect(host, additional_headers=auth_headers) as websocket:
+                self.ws = websocket
+                await self.on_open()
+                await self.handler() # This is where the client stays connected and processes messages
+        except websockets.ConnectionClosed as e:
+            await self.on_close(e.code, e.reason)
+        except Exception as e:
+            await self.on_error(e)
+        finally:
+             self.ws = None # Clear the websocket reference when the connection closes
+        
 
     async def on_open(self):
         """Callback when WebSocket connection is opened."""
         print("WebSocket connection opened.")
         await self.subscribe_to_tickers()
+        
 
     async def subscribe_to_tickers(self):
         """Subscribe to ticker updates for all markets."""
@@ -205,9 +220,11 @@ class KalshiWebSocketClient(KalshiBaseClient):
             "id": self.message_id,
             "cmd": "subscribe",
             "params": {
-                "channels": ["ticker"]
+                "channels": ["ticker_v2"],
+                "market_ticker": self.ticker_list
             }
         }
+        print(subscription_message)
         await self.ws.send(json.dumps(subscription_message))
         self.message_id += 1
 
@@ -215,15 +232,17 @@ class KalshiWebSocketClient(KalshiBaseClient):
         """Handle incoming messages."""
         try:
             async for message in self.ws:
-                await self.on_message(message)
+                data=json.loads(message)
+                await self.on_message(data)
         except websockets.ConnectionClosed as e:
             await self.on_close(e.code, e.reason)
         except Exception as e:
             await self.on_error(e)
 
-    async def on_message(self, message):
+    async def on_message(self, data):
         """Callback for handling incoming messages."""
-        print("Received message:", message)
+        print("Received message:")
+        pprint.pp(data)
 
     async def on_error(self, error):
         """Callback for handling errors."""
