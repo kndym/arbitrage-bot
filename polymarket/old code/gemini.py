@@ -2,20 +2,26 @@ import asyncio
 import websockets
 import json
 import os  # Using os for potentially storing API keys (optional for 'market' channel)
+import pprint as pp
 
 # Configuration
-WSS_URL = "wss://clob.polymarket.com/ws"  # Replace with the actual WSS URL if different
+WSS_URL = "wss://ws-subscriptions-clob.polymarket.com/ws/market"  # Replace with the actual WSS URL if different
 # For the 'market' channel, authentication is not needed.
 # If you were using the 'user' channel, you would define these:
-# POLYMARKET_API_KEY = os.environ.get("POLYMARKET_API_KEY")
-# POLYMARKET_SECRET = os.environ.get("POLYMARKET_SECRET")
-# POLYMARKET_PASSPHRASE = os.environ.get("POLYMARKET_PASSPHRASE")
+
 
 async def receive_market_data():
     """
     Connects to the Polymarket CLOP WSS API and receives market data.
     """
     uri = WSS_URL
+    api_key=os.getenv("CLOB_API_KEY")
+    api_secret=os.getenv("CLOB_SECRET")
+    api_passphrase=os.getenv("CLOB_PASS_PHRASE")
+    auth = {"apiKey": api_key, "secret": api_secret, "passphrase": api_passphrase}
+
+
+
     print(f"Connecting to {uri}")
 
     try:
@@ -24,8 +30,9 @@ async def receive_market_data():
 
             # Subscribe to the 'market' channel
             subscription_message = {
-                "type": "Market",
-                "assets_ids": ["65818619657568813474341868652308942079804919287380422192892211131408793125422"], # Example asset ID
+                "type": "MARKET",
+                "assets_ids": ["45374581549195993272455335447780192076746148907066452139786558534049308360520"]
+                # Example asset ID
                 # "markets": ["0xbd31dc8a20211944f6b70f31557f1001557b59905b7738480ca09bd4532f84af"] # Example market ID (condition ID)
                 # You can include either asset_ids or markets, or both, depending on what you want to track.
                 # The example uses asset_ids.
@@ -37,37 +44,49 @@ async def receive_market_data():
             while True:
                 try:
                     message = await websocket.recv()
-                    data = json.loads(message)
+                    all_data = json.loads(message)
 
                     # Process the received data
-                    event_type = data.get("event_type")
+                    for data in all_data:
+                        event_type = data.get("event_type")
 
-                    if event_type == "book":
-                        print("\n--- Book Update ---")
-                        print(f"Asset ID: {data.get('asset_id')}")
-                        print(f"Market: {data.get('market')}")
-                        print(f"Timestamp: {data.get('timestamp')}")
-                        print("Buys:", data.get('buys'))
-                        print("Sells:", data.get('sells'))
-                        # You would typically store and manage the order book data here
-                    elif event_type == "price_change":
-                        print("\n--- Price Change ---")
-                        print(f"Asset ID: {data.get('asset_id')}")
-                        print(f"Market: {data.get('market')}")
-                        print(f"Timestamp: {data.get('timestamp')}")
-                        print("Changes:", data.get('changes'))
-                        # Update your internal representation of price levels
-                    elif event_type == "tick_size_change":
-                        print("\n--- Tick Size Change ---")
-                        print(f"Asset ID: {data.get('asset_id')}")
-                        print(f"Market: {data.get('market')}")
-                        print(f"Timestamp: {data.get('timestamp')}")
-                        print(f"Old Tick Size: {data.get('old_tick_size')}")
-                        print(f"New Tick Size: {data.get('new_tick_size')}")
-                        # Adjust your handling of prices if needed
-                    else:
-                        print("\n--- Unhandled Message ---")
-                        print(json.dumps(data, indent=2))
+                        if event_type == "book":
+                            print("\n--- Book Update ---")
+                            print(f"Asset ID: {data.get('asset_id')}")
+                            print(f"Market: {data.get('market')}")
+                            print(f"Timestamp: {data.get('timestamp')}")
+                            print("Buys:", data.get('buys'))
+                            print("Sells:", data.get('sells'))
+                            # You would typically store and manage the order book data here
+                        elif event_type == "price_change":
+                            print("\n--- Price Change ---")
+                            print(f"Asset ID: {data.get('asset_id')}")
+                            print(f"Market: {data.get('market')}")
+                            print(f"Timestamp: {data.get('timestamp')}")
+                            print("Changes:", data.get('changes'))
+                            # Update your internal representation of price levels
+                        elif event_type == "tick_size_change":
+                            print("\n--- Tick Size Change ---")
+                            print(f"Asset ID: {data.get('asset_id')}")
+                            print(f"Market: {data.get('market')}")
+                            print(f"Timestamp: {data.get('timestamp')}")
+                            print(f"Old Tick Size: {data.get('old_tick_size')}")
+                            print(f"New Tick Size: {data.get('new_tick_size')}")
+                            # Adjust your handling of prices if needed
+                        elif event_type == "last_trade_price":
+                            print("\n--- Last Trade Price ---")
+                            print(f"Asset ID: {data.get('asset_id')}")
+                            print(f"Market: {data.get('market')}")
+                            print(f"Timestamp: {data.get('timestamp')}")
+                            print(f"Side: {data.get('side')}")
+                            print(f"Price: {data.get('price')}")
+                            print(f"Size: {data.get('size')}")
+                            print(f"Fee Rate (bps): {data.get('fee_rate_bps')}")
+                            # You can also log or update the last trade details in your internal state here
+
+                        else:
+                            print("\n--- Unhandled Message ---")
+                            pp.pprint(data)
 
                 except websockets.exceptions.ConnectionClosedOK:
                     print("Connection closed gracefully.")

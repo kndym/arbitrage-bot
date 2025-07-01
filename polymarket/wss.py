@@ -11,7 +11,8 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 # Polymarket CLOB WebSocket URI
 # We'll connect to the /market endpoint for market data subscriptions
-POLYMARKET_MARKET_WSS_URI = "wss://ws-subscriptions-clob.polymarket.com/ws/market"
+POLYMARKET_MARKET_WSS_URI = "wss://ws-subscriptions-clob.polymarket.com/ws/market"  # Replace with the actual WSS URL if different
+
 
 # Example Asset ID (Token ID) from the documentation.
 # You can add more asset IDs here in a list: ["ID1", "ID2", "ID3"]
@@ -24,13 +25,12 @@ class PolymarketWSS:
         self.asset_ids = asset_ids
         self.message_queue = message_queue
         self.websocket = None
-        self.ssl_context = ssl.create_default_context(cafile=certifi.where())
 
     async def connect(self):
         """Connects to the Polymarket WebSocket."""
         try:
             logging.info(f"Connecting to Polymarket WebSocket: {self.uri}")
-            self.websocket = await websockets.connect(self.uri, ssl=self.ssl_context)
+            self.websocket = await websockets.connect(self.uri)
             logging.info(f"Connected to Polymarket WebSocket: {self.uri}")
 
             # Subscribe to the specified market data after connecting
@@ -47,7 +47,7 @@ class PolymarketWSS:
 
     async def _subscribe_to_market_data(self):
         """Sends the subscription message for market data."""
-        if self.websocket and not self.websocket.closed:
+        if self.websocket:
             # According to the documentation, the subscription message requires:
             # - type: "MARKET" (for the market channel)
             # - assets_ids: A list of asset IDs (token IDs)
