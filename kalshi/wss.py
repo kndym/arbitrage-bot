@@ -1,35 +1,31 @@
 import asyncio
-import json
 import websockets
-import ssl
-import certifi # Useful for cross-platform certificate handling
-import pprint 
-
-from clients import KalshiWebSocketClient
-
-from main import KEYID, private_key, env
+import json
+import logging
+from clients import KalshiWebSocketClient, Environment
+from cryptography.hazmat.primitives.asymmetric import padding, rsa
 
 
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-MARKET_TICKER = "KXNBAGAME-25MAY16BOSNYK-BOS"
+class KalshiWSS(KalshiWebSocketClient):
+    def __init__(
+        self,
+        key_id: str,
+        private_key: rsa.RSAPrivateKey,
+        environment: Environment.DEMO,
+        message_queue: asyncio.Queue
+    ):
+        super().__init__(key_id, private_key, environment)
+        self.message_queue=message_queue
 
+#Example usage (for testing the class individually)
+async def main():
+    message_queue = asyncio.Queue()
+    kalshi_wss = KalshiWSS(message_queue) # Replace with actual URI
+    await kalshi_wss.connect()
+    await kalshi_wss.listen()
 
-async def websocket_connect():
-    # Initialize the WebSocket client
-    ws_client = KalshiWebSocketClient(
-        key_id=KEYID,
-        private_key=private_key,
-        environment=env
-    )
-    
-    
-    # Connect via WebSocket
-    await ws_client.connect(MARKET_TICKER)
-
-
-
-asyncio.run(websocket_connect())
-
-
-
-
+if __name__ == "__main__":
+    asyncio.run(main())

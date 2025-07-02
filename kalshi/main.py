@@ -55,6 +55,11 @@ client = KalshiHttpClient(
     environment=env
 )
 
+websocket=KalshiWebSocketClient(
+    key_id=KEYID,
+    private_key=private_key,
+    environment=env
+)
 
 
 
@@ -99,7 +104,9 @@ def find_markets(title_string):
             if title_string in event["title"]:
                 pprint.pp(event["title"])
                 for market in event["markets"]:
+                    pass
                     pprint.pp(market)
         if cursor=="":
             break
 
+find_markets("Milwaukee")
