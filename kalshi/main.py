@@ -55,11 +55,6 @@ client = KalshiHttpClient(
     environment=env
 )
 
-websocket=KalshiWebSocketClient(
-    key_id=KEYID,
-    private_key=private_key,
-    environment=env
-)
 
 
 
@@ -109,4 +104,4 @@ def find_markets(title_string):
         if cursor=="":
             break
 
-find_markets("Milwaukee")
+find_markets("Cleveland vs Minnesota")

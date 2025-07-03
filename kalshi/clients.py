@@ -5,6 +5,7 @@ from typing import Any, Dict, Optional
 from datetime import datetime, timedelta
 from enum import Enum
 import json
+import pprint as pp
 
 from requests.exceptions import HTTPError
 
@@ -13,7 +14,6 @@ from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.exceptions import InvalidSignature
 
 import websockets
-import pprint
 import asyncio # Added for WebSocket client's message_queue and async operations
 
 import logging
@@ -271,32 +271,31 @@ class KalshiWebSocketClient(KalshiBaseClient):
         self,
         key_id: str,
         private_key: rsa.RSAPrivateKey,
-        environment: Environment = Environment.DEMO,
-        message_queue: Optional[asyncio.Queue] = None, # Make message_queue explicit for constructor
+        environment: Environment.DEMO,
+        message_queue: Optional[asyncio.Queue], # Make message_queue explicit for constructor
+        ticker_list: list
     ):
         super().__init__(key_id, private_key, environment)
         self.ws = None
         self.url_suffix = "/trade-api/ws/v2"
         self.message_id = 1  # Add counter for message IDs
         self.message_queue = message_queue # Assign the queue
-        self.ticker_list = [] # Initialize ticker_list
         self.logger = logger.getChild('WebSocketClient') # Child logger
+        self.ticker_list = ticker_list 
 
 
-    async def connect(self, ticker_list: list):
+
+    async def connect(self):
         """Establishes a WebSocket connection using authentication."""
         host = self.WS_BASE_URL + self.url_suffix
         auth_headers = self.request_headers("GET", self.url_suffix)
-        self.ticker_list=ticker_list
         self.logger.info(f"Attempting to connect to Kalshi WebSocket: {host}")
 
         # The async with block keeps the connection open as long as the code inside is running
         try:
-            async with websockets.connect(host, additional_headers=auth_headers) as websocket:
-                self.ws = websocket
-                self.logger.info(f"Successfully connected to Kalshi WebSocket: {host}")
-                await self.on_open()
-                await self.handler() # This is where the client stays connected and processes messages
+            self.ws = await websockets.connect(host, additional_headers=auth_headers)
+            self.logger.info(f"Successfully connected to Kalshi WebSocket: {host}")
+            await self.subscribe_to_tickers()
         except websockets.ConnectionClosed as e:
             await self.on_close(e.code, e.reason)
             self.logger.warning(f"WebSocket connection closed unexpectedly. Code: {e.code}, Reason: {e.reason}")
@@ -306,31 +305,27 @@ class KalshiWebSocketClient(KalshiBaseClient):
         except Exception as e:
             await self.on_error(e)
             self.logger.critical(f"Unhandled exception during WebSocket connection: {e}", exc_info=True)
-        finally:
-             self.ws = None # Clear the websocket reference when the connection closes
-             self.logger.info("WebSocket connection context exited. Cleared websocket reference.")
 
-    async def on_open(self):
-        """Callback when WebSocket connection is opened."""
-        self.logger.info("WebSocket connection opened.")
-        await self.subscribe_to_tickers()
 
     async def subscribe_to_tickers(self):
         """Subscribe to ticker updates for specified markets."""
         if not self.ticker_list:
             self.logger.warning("No tickers provided for subscription. Skipping subscription.")
             return
+        self.ticker_list = self.ticker_list if len(self.ticker_list)!=1 else self.ticker_list[0]
 
         subscription_message = {
             "id": self.message_id,
             "cmd": "subscribe",
             "params": {
-                "channels": ["ticker_v2"], # Ensure this is correct for your desired data
+                "channels": ["orderbook_delta","trade","fill", "ticker_v2"], # Ensure this is correct for your desired data
                 "market_ticker": self.ticker_list
             }
         }
+
+
         self.logger.info(f"Sending subscription message: {json.dumps(subscription_message)}")
-        if self.ws and not self.ws.closed:
+        if self.ws:
             try:
                 await self.ws.send(json.dumps(subscription_message))
                 self.message_id += 1
@@ -341,7 +336,7 @@ class KalshiWebSocketClient(KalshiBaseClient):
             self.logger.warning("WebSocket not connected or closed. Cannot send subscription message.")
 
 
-    async def handler(self):
+    async def listen(self):
         """Handle incoming messages."""
         self.logger.info("Starting WebSocket message handler.")
         try:
@@ -369,6 +364,7 @@ class KalshiWebSocketClient(KalshiBaseClient):
                 event_type=data.get("type", "unknown")
                 event_cmd = data.get("cmd", "unknown") # Kalshi uses 'cmd' for initial messages like 'subscribe_ack'
                 event_channel = data.get("channel", "unknown") # Kalshi often uses 'channel' for streaming data
+                #print(event_type)
                 self.logger.debug(f"Put '{event_type}'/'{event_cmd}' event from channel '{event_channel}' into queue from Kalshi.")
             except Exception as e:
                 self.logger.error(f"Error putting message into queue: {e}. Message data: {json.dumps(data)}", exc_info=True)
@@ -472,6 +468,3 @@ async def main():
             except Exception as e:
                 logger.error(f"Error waiting for Kalshi WS task to cancel: {e}")
 
-
-if __name__ == "__main__":
-    asyncio.run(main())

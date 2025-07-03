@@ -16,7 +16,7 @@ POLYMARKET_MARKET_WSS_URI = "wss://ws-subscriptions-clob.polymarket.com/ws/marke
 
 # Example Asset ID (Token ID) from the documentation.
 # You can add more asset IDs here in a list: ["ID1", "ID2", "ID3"]
-MARKET_ASSET_IDS = ["65818619657568813474341868652308942079804919287380422192892211131408793125422"]
+MARKET_ASSET_IDS = ["81812275716596780380477963243470897695752789232606107869122888210164238519178"]
 
 
 class PolymarketWSS:
@@ -87,7 +87,7 @@ class PolymarketWSS:
                         event_type = data.get("event_type")
 
                         # The MARKET channel provides "book", "price_change", and "tick_size_change" events.
-                        if event_type in ["book", "price_change", "tick_size_change"]:
+                        if event_type in ["book", "price_change", "tick_size_change", "last_trade_price"]:
                             # Note on 'price_change' events: The `data` object contains a 'changes'
                             # key, which is a list of individual price level updates.
                             # We put the entire event object into the queue to preserve context
@@ -96,7 +96,7 @@ class PolymarketWSS:
                             logging.debug(f"Put {event_type} event into queue from Polymarket")
                         else:
                             # Log other messages (e.g., initial confirmations, errors)
-                            logging.info(f"Received non-market-data event from Polymarket:\n{pprint.pformat(data)}")
+                            logging.info(f"Received non-market-data event from Polymarket")
 
                 except json.JSONDecodeError:
                     logging.warning(f"Failed to decode JSON from Polymarket: {message}")
@@ -156,6 +156,7 @@ async def main():
 
 if __name__ == "__main__":
     try:
+        print('loooooooool')
         asyncio.run(main())
     except KeyboardInterrupt:
         print("\nProgram interrupted. Shutting down.")
