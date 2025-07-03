@@ -104,4 +104,4 @@ def find_markets(title_string):
         if cursor=="":
             break
 
-find_markets("Cleveland vs Minnesota")
+find_markets("Houston vs Colorado")

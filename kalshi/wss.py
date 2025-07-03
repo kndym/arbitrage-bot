@@ -2,7 +2,7 @@ import asyncio
 import websockets
 import json
 import logging
-from kalshi.clients import KalshiWebSocketClient, Environment
+from clients import KalshiWebSocketClient, Environment
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from dotenv import load_dotenv
 import os
@@ -13,7 +13,7 @@ load_dotenv()
 env = Environment.PROD # toggle environment here
 KEYID = os.getenv('DEMO_KEYID') if env == Environment.DEMO else os.getenv('PROD_KEYID')
 KEYFILE = os.getenv('DEMO_KEYFILE') if env == Environment.DEMO else os.getenv('PROD_KEYFILE')
-TICKERS= ['KXMLBGAME-25JUL02MILNYMG2-NYM']
+TICKERS= ['KXMLBGAME-25JUL03HOUCOL-HOU']
 #['KXMLBGAME-25JUL02MILNYMG2-NYM']
 EVENTS=  ['KXMLBGAME-25JUL02MILNYMG2']
 
