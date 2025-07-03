@@ -365,7 +365,6 @@ class KalshiWebSocketClient(KalshiBaseClient):
                 event_cmd = data.get("cmd", "unknown") # Kalshi uses 'cmd' for initial messages like 'subscribe_ack'
                 event_channel = data.get("channel", "unknown") # Kalshi often uses 'channel' for streaming data
                 #print(event_type)
-                pp.pprint(data)
                 self.logger.debug(f"Put '{event_type}'/'{event_cmd}' event from channel '{event_channel}' into queue from Kalshi.")
             except Exception as e:
                 self.logger.error(f"Error putting message into queue: {e}. Message data: {json.dumps(data)}", exc_info=True)

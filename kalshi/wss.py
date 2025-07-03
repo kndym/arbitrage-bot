@@ -2,7 +2,7 @@ import asyncio
 import websockets
 import json
 import logging
-from clients import KalshiWebSocketClient, Environment
+from kalshi.clients import KalshiWebSocketClient, Environment
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from dotenv import load_dotenv
 import os
@@ -56,18 +56,3 @@ class KalshiWSS(KalshiWebSocketClient):
         self.message_queue=message_queue
         self.ticker_list = ticker_list
 
-#Example usage (for testing the class individually)
-async def main():
-    message_queue = asyncio.Queue()
-    kalshi_wss = KalshiWSS(key_id=KEYID,
-        private_key=private_key,
-        environment=env,
-        message_queue = message_queue,
-        ticker_list=TICKERS)
-    await kalshi_wss.connect()
-    await kalshi_wss.listen()
-
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
