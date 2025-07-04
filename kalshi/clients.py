@@ -464,7 +464,7 @@ async def main():
             # Get messages from the queue (this simulates the main processor)
             source, message = await message_queue.get()
             logger.info(f"\n--- Main received from {source} ---")
-            pprint.pprint(message)
+            pp.pprint(message)
             message_queue.task_done() # Mark the task as done for queue tracking
 
     except KeyboardInterrupt:
