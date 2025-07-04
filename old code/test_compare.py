@@ -3,35 +3,24 @@ import logging
 import asyncio
 import time
 from typing import Dict, Any, Optional, Tuple
-from compare import initialize_market_data, process_websocket_message, print_prices_periodically
+from compare import initialize_market_data, process_websocket_message, print_prices_periodically, initialize_globals
 from polymarket.wss import PolymarketWSS, POLYMARKET_MARKET_WSS_URI
 from kalshi.wss import KalshiWSS, env, KEYID, private_key
+from config import poly_asset_ids_to_subscribe, kalshi_tickers_to_subscribe, RUN_DURATION_MINUTES, JSON_OUTPUT_FILE_NAME
 
 # Opening JSON file
-with open('markets.json') as json_file:
-    MARKET_MAPPING = json.load(json_file)
 
-RUN_DURATION_MINUTES = 5
-OUTPUT_FILE_NAME = "order_book_snapshot.txt"
-JSON_OUTPUT_FILE_NAME = "order_book_updates.json" 
-PRINT_INTERVAL_SECONDS = 10 # New constant for print interval
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 async def main():
+    
     message_queue = asyncio.Queue()
 
     await initialize_market_data()
-
-    # Get specific asset IDs/tickers from the initialized MARKET_MAPPING
-    poly_asset_ids_to_subscribe = [
-        ids["polymarket"] for ids in MARKET_MAPPING.values() if "polymarket" in ids
-    ]
-    kalshi_tickers_to_subscribe = [
-        ids["kalshi"] for ids in MARKET_MAPPING.values() if "kalshi" in ids
-    ]
 
     polymarket_wss = PolymarketWSS(
         POLYMARKET_MARKET_WSS_URI, 

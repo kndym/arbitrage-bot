@@ -1,6 +1,6 @@
 from order_book import OrderBook
-from polymarket_updates import update_polymarket_order_book
-from kalshi_updates import update_kalshi_order_book
+from polymarket.updates import update_polymarket_order_book
+from kalshi.updates import update_kalshi_order_book
 import json # For pretty printing example data
 
 # --- Polymarket Example ---

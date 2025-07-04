@@ -1,11 +1,10 @@
 import asyncio
 import logging
 import pprint
-from polymarket.wss import PolymarketWSS, POLYMARKET_MARKET_WSS_URI, MARKET_ASSET_IDS
-from kalshi.wss import KalshiWSS,  env, KEYID, private_key, TICKERS
-from order_book import OrderBook
-from polymarket_updates import update_polymarket_order_book
-from kalshi_updates import update_kalshi_order_book
+from polymarket.wss import PolymarketWSS, POLYMARKET_MARKET_WSS_URI
+from kalshi.wss import KalshiWSS,  env, KEYID, private_key
+from test_kalshi import TICKERS
+from test_poly import MARKET_ASSET_IDS
 
 
 async def main():
