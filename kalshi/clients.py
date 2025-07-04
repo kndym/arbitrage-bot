@@ -312,17 +312,17 @@ class KalshiWebSocketClient(KalshiBaseClient):
         if not self.ticker_list:
             self.logger.warning("No tickers provided for subscription. Skipping subscription.")
             return
-        self.ticker_list = self.ticker_list if len(self.ticker_list)!=1 else self.ticker_list[0]
-
         subscription_message = {
             "id": self.message_id,
             "cmd": "subscribe",
             "params": {
-                "channels": ["orderbook_delta","trade","fill", "ticker_v2"], # Ensure this is correct for your desired data
-                "market_ticker": self.ticker_list
+                "channels": ["orderbook_delta"], # Ensure this is correct for your desired data
             }
         }
-
+        if len(self.ticker_list)!=1:
+            subscription_message["params"]["market_tickers"]=self.ticker_list
+        else:
+            subscription_message["params"]["market_ticker"]=self.ticker_list[0]
 
         self.logger.info(f"Sending subscription message: {json.dumps(subscription_message)}")
         if self.ws:
@@ -365,6 +365,7 @@ class KalshiWebSocketClient(KalshiBaseClient):
                 event_cmd = data.get("cmd", "unknown") # Kalshi uses 'cmd' for initial messages like 'subscribe_ack'
                 event_channel = data.get("channel", "unknown") # Kalshi often uses 'channel' for streaming data
                 #print(event_type)
+                #pp.pprint(data)
                 self.logger.debug(f"Put '{event_type}'/'{event_cmd}' event from channel '{event_channel}' into queue from Kalshi.")
             except Exception as e:
                 self.logger.error(f"Error putting message into queue: {e}. Message data: {json.dumps(data)}", exc_info=True)
@@ -379,6 +380,23 @@ class KalshiWebSocketClient(KalshiBaseClient):
     async def on_close(self, close_status_code, close_msg):
         """Callback when WebSocket connection is closed."""
         self.logger.info(f"WebSocket connection closed with code: {close_status_code} and message: '{close_msg}'")
+    
+    async def close(self):
+        """Closes the Polymarket WebSocket connection."""
+        if self.ws:
+            await self.ws.close()
+            logging.info("Polymarket WebSocket connection closed.")
+
+
+    async def disconnect(self):
+        """Closes the Polymarket WebSocket connection gracefully."""
+        if self.ws:
+            logging.info("Closing Polymarket WebSocket connection...")
+            await self.ws.close()
+            self.ws = None # Clear the websocket instance
+            logging.info("Polymarket WebSocket connection closed.")
+        else:
+            logging.info("Polymarket WebSocket not connected.")
 
 
 # Example Usage (adapted from your Polymarket example to be testable)

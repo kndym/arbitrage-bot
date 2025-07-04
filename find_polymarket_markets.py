@@ -9,7 +9,7 @@ for x in range(3):
     response=r.json()
 
     for event in response:
-        if any( x in event["slug"] for x in ["nba", "mlb", "nhl"]):
+        if any( x in event["slug"] for x in ["mlb"]):
             print(event["slug"])
             print(event["markets"][0]["clobTokenIds"])
  

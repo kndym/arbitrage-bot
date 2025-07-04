@@ -16,7 +16,7 @@ POLYMARKET_MARKET_WSS_URI = "wss://ws-subscriptions-clob.polymarket.com/ws/marke
 
 # Example Asset ID (Token ID) from the documentation.
 # You can add more asset IDs here in a list: ["ID1", "ID2", "ID3"]
-MARKET_ASSET_IDS = ["81812275716596780380477963243470897695752789232606107869122888210164238519178"]
+MARKET_ASSET_IDS = ["82997507803868156196594079733549911693678727367768394503054297414739649154218"]
 
 
 class PolymarketWSS:
@@ -131,6 +131,16 @@ class PolymarketWSS:
         if self.websocket:
             await self.websocket.close()
             logging.info("Polymarket WebSocket connection closed.")
+
+    async def disconnect(self):
+        """Closes the Polymarket WebSocket connection gracefully."""
+        if self.websocket:
+            logging.info("Closing Polymarket WebSocket connection...")
+            await self.websocket.close()
+            self.websocket = None # Clear the websocket instance
+            logging.info("Polymarket WebSocket connection closed.")
+        else:
+            logging.info("Polymarket WebSocket not connected.")
 
 
 # Example usage (for testing the class individually)

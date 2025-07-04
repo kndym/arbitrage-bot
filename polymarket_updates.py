@@ -15,7 +15,7 @@ def update_polymarket_order_book(order_book: OrderBook, data: Dict[str, Any]):
     # Polymarket uses asset_id + market for unique market identification
     # We'll use the 'market' hash as the primary identifier for simplicity here,
     # or you could combine them.
-    market_identifier = data.get("market") 
+    market_identifier = data.get("asset_id") 
     if market_identifier is None:
         print(f"Warning: Polymarket update missing 'market' identifier. Data: {data}")
         return
@@ -72,4 +72,4 @@ def update_polymarket_order_book(order_book: OrderBook, data: Dict[str, Any]):
                 continue
         # print(f"Polymarket: Price change updated for {order_book.market_id}")
     else:
-        print(f"Warning: Unhandled Polymarket event type: {event_type}. Data: {data}")
+        print(f"Warning: Unhandled Polymarket event type: {event_type}.")

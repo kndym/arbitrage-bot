@@ -26,13 +26,14 @@ async def main():
         # Start listening in the background only if connection was successful
         asyncio.create_task(kalshi_wss.listen())
         asyncio.create_task(polymarket_wss.listen())
-        #asyncio.create_task(kalshi_wss.listen())
+
 
         print("Polymarket listener started. Waiting for messages... (Press Ctrl+C to stop)")
         while True:
             # Get messages from the queue (this simulates the main processor)
             source, message = await message_queue.get()
             print(f"\n--- Main received from {source} ---")
+            print(type(message))
             #pprint.pprint(message)
     else:
         print("Could not start listener, connection to WebSocket failed.")
