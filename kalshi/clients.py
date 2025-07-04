@@ -282,7 +282,7 @@ class KalshiWebSocketClient(KalshiBaseClient):
         self.message_queue = message_queue # Assign the queue
         self.logger = logger.getChild('WebSocketClient') # Child logger
         self.ticker_list = ticker_list 
-
+        self.server_id=0
 
 
     async def connect(self):
@@ -316,7 +316,7 @@ class KalshiWebSocketClient(KalshiBaseClient):
             "id": self.message_id,
             "cmd": "subscribe",
             "params": {
-                "channels": ["orderbook_delta"], # Ensure this is correct for your desired data
+                "channels": ["orderbook_delta", "market_lifecycle_v2"], # Ensure this is correct for your desired data
             }
         }
         if len(self.ticker_list)!=1:
@@ -334,6 +334,28 @@ class KalshiWebSocketClient(KalshiBaseClient):
                 self.logger.error(f"Error sending subscription message: {e}", exc_info=True)
         else:
             self.logger.warning("WebSocket not connected or closed. Cannot send subscription message.")
+    
+    async def unsubscribe(self, ticker):
+        unsubscription_message = {
+            "id": self.message_id,
+            "cmd": "update_subscription",
+            "params": {
+                "sids": [456],
+                "market_tickers": [ticker],
+                "action": "delete_markets"
+            }
+        }
+
+        self.logger.info(f"Sending unsubscription message: {json.dumps(unsubscription_message)}")
+        if self.ws:
+            try:
+                await self.ws.send(json.dumps(unsubscription_message))
+                self.message_id += 1
+                self.logger.info(f"UNubscription request sent for tickers: {ticker}")
+            except Exception as e:
+                self.logger.error(f"Error sending unsubscription message: {e}", exc_info=True)
+        else:
+            self.logger.warning("WebSocket not connected or closed. Cannot send unsubscription message.")
 
 
     async def listen(self):
@@ -360,13 +382,20 @@ class KalshiWebSocketClient(KalshiBaseClient):
         self.logger.debug("Received message from Kalshi WebSocket.")
         if self.message_queue:
             try:
-                await self.message_queue.put(('kalshi', data))
                 event_type=data.get("type", "unknown")
-                event_cmd = data.get("cmd", "unknown") # Kalshi uses 'cmd' for initial messages like 'subscribe_ack'
-                event_channel = data.get("channel", "unknown") # Kalshi often uses 'channel' for streaming data
+                if event_type in ["orderbook_snapshot", "orderbook_delta"]:
+                    await self.message_queue.put(('kalshi', data))
+                    self.logger.debug(f"Put '{event_type}' event into queue from Kalshi.")
+                elif event_type == "market_lifecycle_v2":
+                    await self.message_queue.put(('update', data))
+                    self.logger.debug(f"Put '{event_type}' event into queue from Kalshi.")
+                    pp.pprint(data)
+                else:
+                    if event_type in ["subscribed", "error"]:
+                        pp.pprint(data)
+                    self.logger.info(f"Unkown Kalshi event called {event_type}")
                 #print(event_type)
                 #pp.pprint(data)
-                self.logger.debug(f"Put '{event_type}'/'{event_cmd}' event from channel '{event_channel}' into queue from Kalshi.")
             except Exception as e:
                 self.logger.error(f"Error putting message into queue: {e}. Message data: {json.dumps(data)}", exc_info=True)
         else:

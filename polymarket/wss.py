@@ -2,6 +2,7 @@ import asyncio
 import websockets
 import json
 import logging
+import pprint as pp
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -15,12 +16,12 @@ POLYMARKET_MARKET_WSS_URI = "wss://ws-subscriptions-clob.polymarket.com/ws/marke
 class PolymarketWSS:
     def __init__(self, uri, asset_ids, message_queue):
         self.uri = uri
-        self.asset_ids = asset_ids
+        self.asset_ids = asset_ids # This list will now be dynamically managed
         self.message_queue = message_queue
         self.websocket = None
 
     async def connect(self):
-        """Connects to the Polymarket WebSocket."""
+        """Connects to the Polymarket WebSocket and subscribes to current asset_ids."""
         try:
             logging.info(f"Connecting to Polymarket WebSocket: {self.uri}")
             self.websocket = await websockets.connect(self.uri)
@@ -39,14 +40,14 @@ class PolymarketWSS:
             # Implement a reconnection strategy here
 
     async def _subscribe_to_market_data(self):
-        """Sends the subscription message for market data."""
+        """Sends the subscription message for market data using current asset_ids."""
         if self.websocket:
-            # According to the documentation, the subscription message requires:
-            # - type: "MARKET" (for the market channel)
-            # - assets_ids: A list of asset IDs (token IDs)
-            # - No authentication is needed for the MARKET channel.
+            if not self.asset_ids:
+                logging.info("No Polymarket assets to subscribe to. Skipping subscription.")
+                return
+
             subscribe_message = {
-                "type": "MARKET",  # CORRECTED: Changed from "Market" to "MARKET" to match docs
+                "type": "MARKET",
                 "assets_ids": self.asset_ids
             }
             try:
@@ -79,17 +80,11 @@ class PolymarketWSS:
                     for data in all_events:
                         event_type = data.get("event_type")
 
-                        # The MARKET channel provides "book", "price_change", and "tick_size_change" events.
                         if event_type in ["book", "price_change", "tick_size_change", "last_trade_price"]:
-                            # Note on 'price_change' events: The `data` object contains a 'changes'
-                            # key, which is a list of individual price level updates.
-                            # We put the entire event object into the queue to preserve context
-                            # like timestamp and hash. The consumer can then iterate `data['changes']`.
                             await self.message_queue.put(('polymarket', data))
                             logging.debug(f"Put {event_type} event into queue from Polymarket")
                         else:
-                            # Log other messages (e.g., initial confirmations, errors)
-                            logging.info(f"Received non-market-data event from Polymarket")
+                            logging.info(f"Received non-market-data event from Polymarket: {data}")
 
                 except json.JSONDecodeError:
                     logging.warning(f"Failed to decode JSON from Polymarket: {message}")
@@ -99,7 +94,7 @@ class PolymarketWSS:
             logging.info("Polymarket WebSocket connection closed gracefully.")
         except websockets.exceptions.ConnectionClosedError as e:
             logging.error(f"Polymarket WebSocket connection closed with error: {e}")
-            # Implement a reconnection strategy here
+            # Implement a reconnection strategy here if desired (e.g., attempt connect after a delay)
         except Exception as e:
             logging.error(f"Error in Polymarket WebSocket listen: {e}")
             # Implement a reconnection strategy here
@@ -119,12 +114,6 @@ class PolymarketWSS:
         else:
             logging.warning("Polymarket WebSocket not connected or closed. Cannot send message.")
 
-    async def close(self):
-        """Closes the Polymarket WebSocket connection."""
-        if self.websocket:
-            await self.websocket.close()
-            logging.info("Polymarket WebSocket connection closed.")
-
     async def disconnect(self):
         """Closes the Polymarket WebSocket connection gracefully."""
         if self.websocket:
@@ -135,4 +124,21 @@ class PolymarketWSS:
         else:
             logging.info("Polymarket WebSocket not connected.")
 
-
+    # NEW METHOD: Encapsulates the unsubscription logic
+    async def unsubscribe(self, asset_id: str):
+        """
+        Removes an asset from the subscribed list and re-establishes
+        the connection with the updated subscription set.
+        """
+        if asset_id in self.asset_ids:
+            self.asset_ids.remove(asset_id)
+            logging.info(f"Removed asset ID {asset_id} from Polymarket subscription list. Reconnecting WSS.")
+            
+            # Disconnect the current WebSocket
+            await self.disconnect()
+            
+            # Reconnect, which will trigger a new subscription with the updated asset_ids list
+            await self.connect()
+            logging.info(f"Polymarket WSS reconnected with updated subscriptions.")
+        else:
+            logging.debug(f"Polymarket asset ID {asset_id} not in active subscriptions, no action needed for unsubscribe.")

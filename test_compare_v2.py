@@ -53,7 +53,7 @@ ALL_ORDER_BOOKS: Dict[str, OrderBook] = {}
 REVERSE_MARKET_LOOKUP: Dict[str, str] = {} # Maps native_id -> canonical_name
 MARKET_COMPARISON_DATA: Dict[str, Dict[str, Any]] = {} # Stores comparison for each canonical market
 
-
+# --- Logging Configuration ---
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -292,58 +292,129 @@ def find_cross_outcome_arbitrage(market_a_canonical_name: str, market_b_canonica
             logger.info(f"  Arbitrage Liquidity: {cross_outcome_arbitrage_liquidity:.2f} shares")
 
 
-async def process_websocket_message(source: str, message: Dict[str, Any]):
+async def process_websocket_message(source: str, message: Dict[str, Any], polymarket_wss: PolymarketWSS, kalshi_wss: KalshiWSS):
     """
     Processes a message from the WebSocket queue, updates the relevant order book,
     performs cross-market comparison if applicable, and logs the state to JSON.
+    Handles market closure/resolution by unsubscribing.
     """
     market_id = None
     canonical_market_name = None
 
     if source == 'polymarket':
-        # Polymarket 'book' and 'price_change' messages use 'market' hash (e.g., "0x...")
-        # for their market identifier. The subscription uses 'asset_id'.
-        # Ensure your MARKET_MAPPING uses the 'market' hash for Polymarket entries.
-        market_id = message.get("asset_id") # Use 'market' for consistency with how data flows
-        if market_id:
-            canonical_market_name = REVERSE_MARKET_LOOKUP.get(market_id)
-            if not canonical_market_name:
-                # This could happen if the asset_id in config is for a market hash not explicitly mapped
-                # or if the message structure changes slightly.
-                logger.warning(f"Polymarket message for unmapped market_id: {market_id}. Message: {message}")
-                return
-            order_book = ALL_ORDER_BOOKS.get(market_id)
-            if order_book:
-                update_polymarket_order_book(order_book, message)
-                logger.debug(f"Polymarket book for {market_id} updated.")
-            else:
-                logger.error(f"OrderBook instance not found for Polymarket market_id: {market_id}")
-                return
+        market_id = message.get("asset_id")
+        if not market_id:
+            logger.warning(f"Polymarket message missing 'asset_id'. Message: {message}")
+            return
+        
+        canonical_market_name = REVERSE_MARKET_LOOKUP.get(market_id)
+        if not canonical_market_name:
+            logger.warning(f"Polymarket message for unmapped market_id: {market_id}. Message: {message}")
+            return
+        
+        order_book = ALL_ORDER_BOOKS.get(market_id)
+        if order_book:
+            update_polymarket_order_book(order_book, message)
+            logger.debug(f"Polymarket book for {market_id} updated.")
+        else:
+            logger.error(f"OrderBook instance not found for Polymarket market_id: {market_id}. Perhaps it was already closed/unsubscribed.")
+            return
 
     elif source == 'kalshi':
         msg_content = message.get("msg", {})
         market_id = msg_content.get("market_ticker")
-        if market_id:
+        
+        if not market_id:
+            logger.warning(f"Kalshi message missing 'market_ticker'. Message: {message}")
+            return
+        
+        canonical_market_name = REVERSE_MARKET_LOOKUP.get(market_id)
+        if not canonical_market_name:
+            logger.warning(f"Kalshi message for unmapped market_id: {market_id}")
+            return
+        
+        order_book = ALL_ORDER_BOOKS.get(market_id)
+        if order_book:
+            update_kalshi_order_book(order_book, message)
+            logger.debug(f"Kalshi book for {market_id} updated.")
+        else:
+            logger.error(f"OrderBook instance not found for Kalshi market_id: {market_id}.")
+            return
+    
+    # This 'update' source is specifically for Kalshi market status updates
+    elif source == "update":
+        msg_content = message.get("msg", {})
+        market_id = msg_content.get("market_ticker") # This is the Kalshi ticker
+        
+        # Check for market resolution or deactivation
+        result_true = ("result" in msg_content and msg_content["result"] is not None)
+        closed_true = msg_content.get("is_deactivated", False) # Default to False if not present
+
+        if market_id and (result_true or closed_true):
             canonical_market_name = REVERSE_MARKET_LOOKUP.get(market_id)
             if not canonical_market_name:
-                logger.warning(f"Kalshi message for unmapped market_id: {market_id}")
+                logger.warning(f"Kalshi 'update' message for unmapped market_id: {market_id}. Skipping unsubscribe.")
                 return
-            order_book = ALL_ORDER_BOOKS.get(market_id)
-            if order_book:
-                update_kalshi_order_book(order_book, message)
-                logger.debug(f"Kalshi book for {market_id} updated.")
+
+            logger.info(f"Market {canonical_market_name} (Kalshi: {market_id}) resolved (Result: {msg_content.get('result')}) or closed (Deactivated: {msg_content.get('is_deactivated')}). Attempting to unsubscribe from both platforms.")
+
+            # Find the corresponding Polymarket ID using the canonical name
+            polymarket_id_for_canonical = MARKET_MAPPING.get(canonical_market_name, {}).get("polymarket")
+
+            # Unsubscribe from Kalshi for this market
+            if market_id in kalshi_wss.ticker_list: # Check if we are actively subscribed to it
+                await kalshi_wss.unsubscribe(market_id)
+                logger.info(f"Successfully unsubscribed from Kalshi market: {market_id}")
+                # Note: kalshi_wss.ticker_list is handled within kalshi.wss.unsubscribe
             else:
-                logger.error(f"OrderBook instance not found for Kalshi market_id: {market_id}")
-                return
+                logger.debug(f"Kalshi market {market_id} was not in active subscription list for KalshiWSS, skipping unsubscribe via WSS object.")
+
+            # Unsubscribe from Polymarket for the corresponding market
+            # MODIFIED: Call the new unsubscribe method on PolymarketWSS
+            if polymarket_id_for_canonical and polymarket_id_for_canonical in polymarket_wss.asset_ids: 
+                await polymarket_wss.unsubscribe(polymarket_id_for_canonical)
+                logger.info(f"Successfully unsubscribed from Polymarket market: {polymarket_id_for_canonical} (corresponding to {canonical_market_name})")
+            elif polymarket_id_for_canonical:
+                logger.debug(f"Polymarket market {polymarket_id_for_canonical} was not in active subscription list for PolymarketWSS, skipping unsubscribe via WSS object.")
+            else:
+                logger.debug(f"No corresponding Polymarket market found for {canonical_market_name} in mapping, skipping Polymarket unsubscribe.")
+            
+            # Clean up global data structures for this market pair
+            # Remove the specific Kalshi and Polymarket order books
+            if market_id in ALL_ORDER_BOOKS:
+                del ALL_ORDER_BOOKS[market_id]
+                logger.debug(f"Removed Kalshi order book for {market_id} from active tracking.")
+            if market_id in REVERSE_MARKET_LOOKUP:
+                del REVERSE_MARKET_LOOKUP[market_id]
+                logger.debug(f"Removed Kalshi market {market_id} from reverse lookup.")
+
+            if polymarket_id_for_canonical and polymarket_id_for_canonical in ALL_ORDER_BOOKS:
+                del ALL_ORDER_BOOKS[polymarket_id_for_canonical]
+                logger.debug(f"Removed Polymarket order book for {polymarket_id_for_canonical} from active tracking.")
+            if polymarket_id_for_canonical and polymarket_id_for_canonical in REVERSE_MARKET_LOOKUP:
+                del REVERSE_MARKET_LOOKUP[polymarket_id_for_canonical]
+                logger.debug(f"Removed Polymarket market {polymarket_id_for_canonical} from reverse lookup.")
+
+            # Remove the canonical market from comparison data
+            if canonical_market_name in MARKET_COMPARISON_DATA:
+                del MARKET_COMPARISON_DATA[canonical_market_name]
+                logger.debug(f"Removed canonical market {canonical_market_name} from comparison data.")
+
+            return # Market is closed/resolved, no further processing needed for this message.
+        else:
+            # If it's an 'update' message but not for resolution/closure, just log it for debugging
+            logger.debug(f"Kalshi 'update' message received (not resolved/closed): {message}")
+            return # No other processing needed for this specific 'update' type in this block
+            
     else:
         logger.warning(f"Unknown message source: {source}")
         return
 
     # After updating, perform cross-market comparison if it's a mapped market
-    if canonical_market_name:
+    # This block is only reached if the market was not closed/resolved and unsubscribed from.
+    if canonical_market_name and canonical_market_name in MARKET_COMPARISON_DATA: # Ensure it's still being tracked
         logger.debug(f"Performing cross-market comparison for {canonical_market_name}")
         perform_cross_market_comparison(canonical_market_name)
-        # Log the current state to JSON after every relevant update
         await log_order_book_state_to_json(canonical_market_name)
 
 
@@ -408,7 +479,14 @@ async def print_prices_periodically():
         logger.info(f"\n--- Current Market Snapshot ({datetime.now().strftime('%H:%M:%S')}) ---")
 
         # --- Print Same-Outcome Best Prices and Arb ---
-        for canonical_name, comparison_data in MARKET_COMPARISON_DATA.items():
+        # It's crucial to iterate over a copy of MARKET_COMPARISON_DATA.keys()
+        # because the underlying dict can be modified if markets are unsubscribed.
+        for canonical_name in list(MARKET_COMPARISON_DATA.keys()): 
+            # Re-check if it still exists, as it might have been removed just before this iteration
+            if canonical_name not in MARKET_COMPARISON_DATA:
+                continue
+
+            comparison_data = MARKET_COMPARISON_DATA[canonical_name]
             logger.info(f"\nMarket: {canonical_name}")
 
             poly_book, kalshi_book = get_paired_books(canonical_name)
@@ -457,13 +535,15 @@ async def print_prices_periodically():
         # Iterate through defined complementary pairs
         for market_a_name, market_b_name in COMPLEMENTARY_MARKET_PAIRS.items():
             # Ensure the complementary market is actually mapped in MARKET_MAPPING
-            if market_a_name in MARKET_MAPPING and market_b_name in MARKET_MAPPING:
+            # And ensure both are still actively tracked for comparison
+            if market_a_name in MARKET_MAPPING and market_b_name in MARKET_MAPPING and \
+               market_a_name in MARKET_COMPARISON_DATA and market_b_name in MARKET_COMPARISON_DATA:
                 # To avoid redundant checks (A-B and B-A if mapping is bidirectional)
                 # Ensure we only check each unique pair once. Simple string comparison works.
                 if market_a_name < market_b_name:
                     find_cross_outcome_arbitrage(market_a_name, market_b_name)
             else:
-                logger.debug(f"Skipping cross-outcome check for {market_a_name} <-> {market_b_name} as one or both not fully mapped.")
+                logger.debug(f"Skipping cross-outcome check for {market_a_name} <-> {market_b_name} as one or both not fully mapped or actively tracked.")
 
 
         logger.info("\n" + "=" * 80 + "\n")
@@ -507,28 +587,37 @@ async def main():
     await polymarket_wss.connect()
 
     # Only proceed if at least one connection is successful
+    # This condition was a bit strict (both must be successful).
+    # Changed to proceed if at least one WSS client has an active connection object.
     if kalshi_wss.ws or polymarket_wss.websocket:
         # Start listening in the background
         tasks = []
         if kalshi_wss.ws:
             tasks.append(asyncio.create_task(kalshi_wss.listen()))
+        else:
+            logger.warning("Kalshi WebSocket connection not established.")
         if polymarket_wss.websocket:
             tasks.append(asyncio.create_task(polymarket_wss.listen()))
-        
+        else:
+            logger.warning("Polymarket WebSocket connection not established.")
+
         # Task to consume messages from the queue
-        async def message_consumer():
+        # MODIFIED: Pass the WSS objects to the consumer
+        async def message_consumer(pm_wss: PolymarketWSS, k_wss: KalshiWSS):
             while True:
                 source, message = await message_queue.get()
                 logger.debug(f"\n--- Main received message from {source} ---")
-                asyncio.create_task(process_websocket_message(source, message))
+                # MODIFIED: Pass WSS objects to process_websocket_message
+                asyncio.create_task(process_websocket_message(source, message, pm_wss, k_wss))
                 message_queue.task_done()
 
-        consumer_task = asyncio.create_task(message_consumer())
+        # MODIFIED: Create consumer task passing the WSS instances
+        consumer_task = asyncio.create_task(message_consumer(polymarket_wss, kalshi_wss))
         tasks.append(consumer_task)
         
         # Start the periodic printing task
-        #printer_task = asyncio.create_task(print_prices_periodically())
-        #tasks.append(printer_task)
+        printer_task = asyncio.create_task(print_prices_periodically())
+        tasks.append(printer_task)
 
         logger.info(f"WebSocket listeners started. Running for {RUN_DURATION_MINUTES} minutes...")
         start_time = time.time()
