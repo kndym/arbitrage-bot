@@ -5,7 +5,7 @@ from polymarket.wss import PolymarketWSS, POLYMARKET_MARKET_WSS_URI
 
 # Example Asset ID (Token ID) from the documentation.
 # You can add more asset IDs here in a list: ["ID1", "ID2", "ID3"]
-MARKET_ASSET_IDS = ["72067946303715483465013043891763514810917310572778960866558267797273311687895"]
+MARKET_ASSET_IDS = ["5986371862208839175485490179523653880632219954307111830409221264009788091256"]
 
 async def main():
     message_queue = asyncio.Queue()

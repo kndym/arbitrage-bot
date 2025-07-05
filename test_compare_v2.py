@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import pprint
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Any, Optional, Tuple, List
 import time
 from datetime import datetime, timezone
 import json
@@ -15,10 +15,11 @@ from order_book import OrderBook
 from polymarket.updates import update_polymarket_order_book
 from kalshi.updates import update_kalshi_order_book
 
-# --- Configuration Constants (Consolidated from config.py) ---
-RUN_DURATION_MINUTES = 5 # Set to None for infinite run until Ctrl+C
-JSON_OUTPUT_FILE_NAME = "order_book_updates.json" # Using .jsonl for JSON Lines format
-PRINT_INTERVAL_SECONDS = 60
+# --- Configuration Constants ---
+RUN_DURATION_MINUTES = None # Set to None for infinite run until Ctrl+C
+INITIAL_STATE_FILE_NAME = "initial_order_books.json" # For the full initial snapshot
+ORDER_BOOK_CHANGES_FILE_NAME = "order_book_deltas_jul_5.jsonl" # For subsequent raw updates (JSON Lines)
+PRINT_INTERVAL_SECONDS = 1000000000 # Keep this high as we log changes on event now
 
 # File names for market mappings
 MARKETS_FILE = 'markets.json'
@@ -54,13 +55,10 @@ REVERSE_MARKET_LOOKUP: Dict[str, str] = {} # Maps native_id -> canonical_name
 MARKET_COMPARISON_DATA: Dict[str, Dict[str, Any]] = {} # Stores comparison for each canonical market
 
 # --- Logging Configuration ---
-# Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-
 async def initialize_market_data():
-    """Initializes all OrderBook instances and comparison data structures."""
     if not MARKET_MAPPING:
         logger.warning("MARKET_MAPPING is empty. No markets to track.")
         return
@@ -292,6 +290,139 @@ def find_cross_outcome_arbitrage(market_a_canonical_name: str, market_b_canonica
             logger.info(f"  Arbitrage Liquidity: {cross_outcome_arbitrage_liquidity:.2f} shares")
 
 
+# Helper to clean and round order book data for JSON logging (for initial state only)
+def process_book_data_for_initial(book: OrderBook) -> Dict[str, Any]:
+    if not book:
+        return {}
+    
+    bids_rounded = [[round(p, 4), round(s, 2)] for p, s in book.bids]
+    asks_rounded = [[round(p, 4), round(s, 2)] for p, s in book.asks]
+
+    lowest_ask_val = round(book.lowest_ask, 4) if book.lowest_ask is not None and book.lowest_ask != float('inf') else None
+    highest_bid_val = round(book.highest_bid, 4) if book.highest_bid is not None and book.highest_bid != 0.0 else None
+
+    return {
+        "id": book.market_id,
+        "b": bids_rounded, # bids
+        "a": asks_rounded, # asks
+        "hb": highest_bid_val, # highest_bid
+        "la": lowest_ask_val, # lowest_ask
+        "s": round(book.bid_ask_spread, 4) if book.bid_ask_spread is not None else None, # spread
+        "m": round(book.mid_price, 4) if book.mid_price is not None else None, # mid_price
+        "tbq": round(book.total_bid_liquidity, 2), # total_bid_liquidity
+        "taq": round(book.total_ask_liquidity, 2), # total_ask_liquidity
+    }
+
+# Helper to clean and round comparison data for JSON logging
+def process_comparison_data(data: Dict[str, Any]) -> Dict[str, Any]:
+    if not data:
+        return {}
+
+    cheapest_buy_price = data['cheapest_buy_yes']['price']
+    cheapest_buy_platform = data['cheapest_buy_yes']['platform']
+
+    highest_sell_price = data['highest_sell_yes']['price']
+    highest_sell_platform = data['highest_sell_yes']['platform']
+
+    cb_price = round(cheapest_buy_price, 4) if cheapest_buy_price != float('inf') else None
+    hs_price = round(highest_sell_price, 4) if highest_sell_price != 0.0 else None 
+
+    return {
+        "cb": {"p": cheapest_buy_platform, "pr": cb_price}, # cheapest_buy_yes: platform, price
+        "hs": {"p": highest_sell_platform, "pr": hs_price}, # highest_sell_yes: platform, price
+        "sal": round(data['same_outcome_arbitrage_liquidity'], 2) # same_outcome_arbitrage_liquidity
+    }
+
+
+async def log_initial_state_to_json():
+    """
+    Logs the complete current state of all order books and comparison data to a single JSON file.
+    This is called once at the start.
+    """
+    initial_state_data = {
+        "ts": datetime.now(timezone.utc).isoformat(),
+        "markets": []
+    }
+
+    # Ensure all order books have a chance to populate before logging initial state
+    # This might require some initial messages to arrive and be processed
+    # before calling this function. For a robust system, you might wait for
+    # a certain number of markets to have bids/asks.
+    for canonical_name in sorted(MARKET_MAPPING.keys()): # Sort for consistent output
+        poly_book, kalshi_book = get_paired_books(canonical_name)
+        comparison_data = MARKET_COMPARISON_DATA.get(canonical_name)
+
+        market_entry = {
+            "cn_mkt": canonical_name,
+            "pm": process_book_data_for_initial(poly_book),
+            "ks": process_book_data_for_initial(kalshi_book),
+            "cmp": process_comparison_data(comparison_data)
+        }
+        initial_state_data["markets"].append(market_entry)
+
+    try:
+        with open(INITIAL_STATE_FILE_NAME, "w") as f: # Use "w" to overwrite
+            json.dump(initial_state_data, f, indent=2) # Use indent for readability in initial file
+        logger.info(f"Logged initial state to {INITIAL_STATE_FILE_NAME}")
+    except Exception as e:
+        logger.error(f"Error writing initial state to JSON file: {e}")
+
+
+async def log_order_book_update_to_deltas_json(
+    canonical_name: str, 
+    source_platform: str, 
+    native_market_id: str, 
+    update_payload: Dict[str, Any] # This is the raw message content relevant to the update
+):
+    """
+    Logs an order book update event for a specific market to the deltas JSONL file.
+    Includes the raw update payload and current comparison data.
+    """
+    comparison_data = MARKET_COMPARISON_DATA.get(canonical_name)
+
+    log_entry = {
+        "ts": datetime.now(timezone.utc).isoformat(),
+        "name": canonical_name
+    }
+
+    # The 'update_payload' is the raw message specific to the order book change.
+    # We choose a key based on the source platform.
+    if source_platform == "polymarket":
+        event=update_payload.get("event_type") 
+        if event=="price_change":
+            log_entry["pm_delta"] = {"changes": update_payload["changes"],
+                                     "event_type": "delta",}
+        elif event =="book":
+            log_entry["pm_delta"] = {"changes": {"asks": update_payload["asks"],
+                                                 "bids": update_payload["bids"],},
+                                     "event_type": "book",}
+        else:
+            logger.debug(f"NOVEL MESSAGE POLY")
+    elif source_platform == "kalshi":
+        if update_payload.get("price"):
+            log_entry["ks_delta"] = {"price": update_payload["price"],
+                                     "delta": update_payload["delta"],
+                                     "side": update_payload["side"]}
+        elif update_payload.get("yes"):
+            log_entry["ks_delta"] = {"yes": update_payload["yes"],
+                                     "no": update_payload["no"],}
+        else:
+            logger.debug(f"NOVEL MESSAGE KALSHI")
+    elif source_platform == "system_closure":
+        # For closures, no delta, just record the event
+        pass # No "pm_delta" or "ks_delta" for closure events
+
+    if log_entry.get("ks_delta") or log_entry.get("pm_delta"):
+        try:
+            # Open in append mode, write a single JSON line, then a newline
+            # Using separators to remove whitespace for maximum compactness
+            with open(ORDER_BOOK_CHANGES_FILE_NAME, "a") as f:
+                f.write(json.dumps(log_entry, separators=(',', ':')) + "\n")
+            logger.debug(f"Logged delta for {canonical_name} (from {source_platform}) to {ORDER_BOOK_CHANGES_FILE_NAME}")
+        except Exception as e:
+            logger.error(f"Error writing to JSON deltas log file: {e}")
+
+
 async def process_websocket_message(source: str, message: Dict[str, Any], polymarket_wss: PolymarketWSS, kalshi_wss: KalshiWSS):
     """
     Processes a message from the WebSocket queue, updates the relevant order book,
@@ -300,6 +431,9 @@ async def process_websocket_message(source: str, message: Dict[str, Any], polyma
     """
     market_id = None
     canonical_market_name = None
+    
+    # Store the relevant part of the message to log as a delta
+    update_payload = None 
 
     if source == 'polymarket':
         market_id = message.get("asset_id")
@@ -314,7 +448,10 @@ async def process_websocket_message(source: str, message: Dict[str, Any], polyma
         
         order_book = ALL_ORDER_BOOKS.get(market_id)
         if order_book:
+            # Assume update_polymarket_order_book consumes the relevant message part
+            # and that 'message' itself contains the delta info
             update_polymarket_order_book(order_book, message)
+            update_payload = message # Log the raw Polymarket message
             logger.debug(f"Polymarket book for {market_id} updated.")
         else:
             logger.error(f"OrderBook instance not found for Polymarket market_id: {market_id}. Perhaps it was already closed/unsubscribed.")
@@ -336,19 +473,19 @@ async def process_websocket_message(source: str, message: Dict[str, Any], polyma
         order_book = ALL_ORDER_BOOKS.get(market_id)
         if order_book:
             update_kalshi_order_book(order_book, message)
+            # For Kalshi, the 'msg' part usually contains the event details, not the top-level message.
+            update_payload = message.get("msg", message) # Log the relevant Kalshi message part
             logger.debug(f"Kalshi book for {market_id} updated.")
         else:
             logger.error(f"OrderBook instance not found for Kalshi market_id: {market_id}.")
             return
     
-    # This 'update' source is specifically for Kalshi market status updates
-    elif source == "update":
+    elif source == "update" and False: # This source is specifically for Kalshi market status updates
         msg_content = message.get("msg", {})
-        market_id = msg_content.get("market_ticker") # This is the Kalshi ticker
+        market_id = msg_content.get("market_ticker")
         
-        # Check for market resolution or deactivation
         result_true = ("result" in msg_content and msg_content["result"] is not None)
-        closed_true = msg_content.get("is_deactivated", False) # Default to False if not present
+        closed_true = msg_content.get("is_deactivated", False)
 
         if market_id and (result_true or closed_true):
             canonical_market_name = REVERSE_MARKET_LOOKUP.get(market_id)
@@ -358,19 +495,14 @@ async def process_websocket_message(source: str, message: Dict[str, Any], polyma
 
             logger.info(f"Market {canonical_market_name} (Kalshi: {market_id}) resolved (Result: {msg_content.get('result')}) or closed (Deactivated: {msg_content.get('is_deactivated')}). Attempting to unsubscribe from both platforms.")
 
-            # Find the corresponding Polymarket ID using the canonical name
             polymarket_id_for_canonical = MARKET_MAPPING.get(canonical_market_name, {}).get("polymarket")
 
-            # Unsubscribe from Kalshi for this market
-            if market_id in kalshi_wss.ticker_list: # Check if we are actively subscribed to it
+            if market_id in kalshi_wss.ticker_list: 
                 await kalshi_wss.unsubscribe(market_id)
                 logger.info(f"Successfully unsubscribed from Kalshi market: {market_id}")
-                # Note: kalshi_wss.ticker_list is handled within kalshi.wss.unsubscribe
             else:
                 logger.debug(f"Kalshi market {market_id} was not in active subscription list for KalshiWSS, skipping unsubscribe via WSS object.")
 
-            # Unsubscribe from Polymarket for the corresponding market
-            # MODIFIED: Call the new unsubscribe method on PolymarketWSS
             if polymarket_id_for_canonical and polymarket_id_for_canonical in polymarket_wss.asset_ids: 
                 await polymarket_wss.unsubscribe(polymarket_id_for_canonical)
                 logger.info(f"Successfully unsubscribed from Polymarket market: {polymarket_id_for_canonical} (corresponding to {canonical_market_name})")
@@ -379,110 +511,40 @@ async def process_websocket_message(source: str, message: Dict[str, Any], polyma
             else:
                 logger.debug(f"No corresponding Polymarket market found for {canonical_market_name} in mapping, skipping Polymarket unsubscribe.")
             
-            # Clean up global data structures for this market pair
-            # Remove the specific Kalshi and Polymarket order books
-            if market_id in ALL_ORDER_BOOKS:
-                del ALL_ORDER_BOOKS[market_id]
-                logger.debug(f"Removed Kalshi order book for {market_id} from active tracking.")
-            if market_id in REVERSE_MARKET_LOOKUP:
-                del REVERSE_MARKET_LOOKUP[market_id]
-                logger.debug(f"Removed Kalshi market {market_id} from reverse lookup.")
+            # Clean up global data structures
+            if market_id in ALL_ORDER_BOOKS: del ALL_ORDER_BOOKS[market_id]
+            if market_id in REVERSE_MARKET_LOOKUP: del REVERSE_MARKET_LOOKUP[market_id]
+            if polymarket_id_for_canonical and polymarket_id_for_canonical in ALL_ORDER_BOOKS: del ALL_ORDER_BOOKS[polymarket_id_for_canonical]
+            if polymarket_id_for_canonical and polymarket_id_for_canonical in REVERSE_MARKET_LOOKUP: del REVERSE_MARKET_LOOKUP[polymarket_id_for_canonical]
+            if canonical_market_name in MARKET_COMPARISON_DATA: del MARKET_COMPARISON_DATA[canonical_market_name]
+                
+            # Log this market closure/resolution event without an update_payload
+            await log_order_book_update_to_deltas_json(canonical_market_name, "system_closure", market_id, {}) 
 
-            if polymarket_id_for_canonical and polymarket_id_for_canonical in ALL_ORDER_BOOKS:
-                del ALL_ORDER_BOOKS[polymarket_id_for_canonical]
-                logger.debug(f"Removed Polymarket order book for {polymarket_id_for_canonical} from active tracking.")
-            if polymarket_id_for_canonical and polymarket_id_for_canonical in REVERSE_MARKET_LOOKUP:
-                del REVERSE_MARKET_LOOKUP[polymarket_id_for_canonical]
-                logger.debug(f"Removed Polymarket market {polymarket_id_for_canonical} from reverse lookup.")
-
-            # Remove the canonical market from comparison data
-            if canonical_market_name in MARKET_COMPARISON_DATA:
-                del MARKET_COMPARISON_DATA[canonical_market_name]
-                logger.debug(f"Removed canonical market {canonical_market_name} from comparison data.")
-
-            return # Market is closed/resolved, no further processing needed for this message.
+            return 
         else:
-            # If it's an 'update' message but not for resolution/closure, just log it for debugging
             logger.debug(f"Kalshi 'update' message received (not resolved/closed): {message}")
-            return # No other processing needed for this specific 'update' type in this block
-            
+            return
     else:
         logger.warning(f"Unknown message source: {source}")
         return
 
-    # After updating, perform cross-market comparison if it's a mapped market
-    # This block is only reached if the market was not closed/resolved and unsubscribed from.
-    if canonical_market_name and canonical_market_name in MARKET_COMPARISON_DATA: # Ensure it's still being tracked
+    # After an order book was updated by a relevant message, perform comparison and log the raw message
+    if update_payload is not None and canonical_market_name and canonical_market_name in MARKET_COMPARISON_DATA:
         logger.debug(f"Performing cross-market comparison for {canonical_market_name}")
         perform_cross_market_comparison(canonical_market_name)
-        await log_order_book_state_to_json(canonical_market_name)
-
-
-async def log_order_book_state_to_json(canonical_name: str):
-    """
-    Logs the current state of a specific canonical market's order books
-    and comparison data to a JSONL file.
-    """
-    poly_book, kalshi_book = get_paired_books(canonical_name)
-    comparison_data = MARKET_COMPARISON_DATA.get(canonical_name)
-
-    log_entry = {
-        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
-        "canonical_market": canonical_name,
-        "polymarket_book": {},
-        "kalshi_book": {},
-        "comparison_data": comparison_data
-    }
-
-    if poly_book:
-        log_entry["polymarket_book"] = {
-            "market_id": poly_book.market_id,
-            "last_updated_timestamp": poly_book.last_updated_timestamp,
-            "bids": poly_book.bids, # These are sorted lists of (price, size)
-            "asks": poly_book.asks,
-            "highest_bid": poly_book.highest_bid,
-            "lowest_ask": poly_book.lowest_ask,
-            "bid_ask_spread": poly_book.bid_ask_spread,
-            "mid_price": poly_book.mid_price,
-            "total_bid_liquidity": poly_book.total_bid_liquidity,
-            "total_ask_liquidity": poly_book.total_ask_liquidity,
-        }
-    
-    if kalshi_book:
-        log_entry["kalshi_book"] = {
-            "market_id": kalshi_book.market_id,
-            "last_updated_timestamp": kalshi_book.last_updated_timestamp,
-            "bids": kalshi_book.bids,
-            "asks": kalshi_book.asks,
-            "highest_bid": kalshi_book.highest_bid,
-            "lowest_ask": kalshi_book.lowest_ask,
-            "bid_ask_spread": kalshi_book.bid_ask_spread,
-            "mid_price": kalshi_book.mid_price,
-            "total_bid_liquidity": kalshi_book.total_bid_liquidity,
-            "total_ask_liquidity": kalshi_book.total_ask_liquidity,
-        }
-
-    try:
-        # Open in append mode, write a single JSON line, then a newline
-        with open(JSON_OUTPUT_FILE_NAME, "a") as f:
-            f.write(json.dumps(log_entry) + "\n")
-        logger.debug(f"Logged state for {canonical_name} to {JSON_OUTPUT_FILE_NAME}")
-    except Exception as e:
-        logger.error(f"Error writing to JSON log file: {e}")
+        await log_order_book_update_to_deltas_json(canonical_market_name, source, market_id, update_payload)
 
 
 async def print_prices_periodically():
     """Periodically prints the current best bid and ask for each platform and market,
-       and checks for cross-outcome arbitrage opportunities."""
+       and checks for cross-outcome arbitrage opportunities. This function *only prints*."""
     while True:
         await asyncio.sleep(PRINT_INTERVAL_SECONDS)
         logger.info(f"\n--- Current Market Snapshot ({datetime.now().strftime('%H:%M:%S')}) ---")
 
         # --- Print Same-Outcome Best Prices and Arb ---
-        # It's crucial to iterate over a copy of MARKET_COMPARISON_DATA.keys()
-        # because the underlying dict can be modified if markets are unsubscribed.
         for canonical_name in list(MARKET_COMPARISON_DATA.keys()): 
-            # Re-check if it still exists, as it might have been removed just before this iteration
             if canonical_name not in MARKET_COMPARISON_DATA:
                 continue
 
@@ -491,7 +553,6 @@ async def print_prices_periodically():
 
             poly_book, kalshi_book = get_paired_books(canonical_name)
 
-            # Print Polymarket's Best Bid/Ask
             if poly_book:
                 poly_highest_bid = poly_book.highest_bid
                 poly_lowest_ask = poly_book.lowest_ask
@@ -502,7 +563,6 @@ async def print_prices_periodically():
             else:
                 logger.info(f"  Polymarket: N/A (Order Book not available)")
 
-            # Print Kalshi's Best Bid/Ask
             if kalshi_book:
                 kalshi_highest_bid = kalshi_book.highest_bid
                 kalshi_lowest_ask = kalshi_book.lowest_ask
@@ -513,7 +573,6 @@ async def print_prices_periodically():
             else:
                 logger.info(f"  Kalshi: N/A (Order Book not available)")
             
-            # Print Global Best Prices (from cross-market comparison for the SAME outcome)
             global_buy_platform = comparison_data['cheapest_buy_yes']['platform'] or 'N/A'
             global_buy_price = comparison_data['cheapest_buy_yes']['price'] 
             global_buy_price_str = f"{global_buy_price:.4f}" if global_buy_price != float('inf') else 'N/A'
@@ -530,21 +589,14 @@ async def print_prices_periodically():
             if arb_liquidity > 0:
                 logger.info(f"    Arbitrage Liquidity: {arb_liquidity:.2f} shares")
         
-        # --- Check for Cross-Outcome Arbitrage Opportunities ---
         logger.info("\n--- Checking Cross-Outcome Arbitrage Opportunities ---")
-        # Iterate through defined complementary pairs
         for market_a_name, market_b_name in COMPLEMENTARY_MARKET_PAIRS.items():
-            # Ensure the complementary market is actually mapped in MARKET_MAPPING
-            # And ensure both are still actively tracked for comparison
             if market_a_name in MARKET_MAPPING and market_b_name in MARKET_MAPPING and \
                market_a_name in MARKET_COMPARISON_DATA and market_b_name in MARKET_COMPARISON_DATA:
-                # To avoid redundant checks (A-B and B-A if mapping is bidirectional)
-                # Ensure we only check each unique pair once. Simple string comparison works.
                 if market_a_name < market_b_name:
                     find_cross_outcome_arbitrage(market_a_name, market_b_name)
             else:
                 logger.debug(f"Skipping cross-outcome check for {market_a_name} <-> {market_b_name} as one or both not fully mapped or actively tracked.")
-
 
         logger.info("\n" + "=" * 80 + "\n")
 
@@ -554,8 +606,6 @@ async def main():
 
     await initialize_market_data()
 
-    # Get specific asset IDs/tickers from the initialized MARKET_MAPPING
-    # Consolidate subscription lists, ensuring no duplicates
     poly_asset_ids_to_subscribe = list(set([
         market_ids["polymarket"] for market_ids in MARKET_MAPPING.values() if "polymarket" in market_ids
     ]))
@@ -563,10 +613,9 @@ async def main():
         market_ids["kalshi"] for market_ids in MARKET_MAPPING.values() if "kalshi" in market_ids
     ]))
     
-    # Check if we have any markets to subscribe to
     if not poly_asset_ids_to_subscribe and not kalshi_tickers_to_subscribe:
         logger.critical("No markets found in MARKET_MAPPING to subscribe to. Exiting.")
-        return # Exit if no markets are defined
+        return
 
     polymarket_wss = PolymarketWSS(
         POLYMARKET_MARKET_WSS_URI, 
@@ -582,15 +631,10 @@ async def main():
         ticker_list=kalshi_tickers_to_subscribe
     )
     
-    # Connect to websockets
     await kalshi_wss.connect()
     await polymarket_wss.connect()
 
-    # Only proceed if at least one connection is successful
-    # This condition was a bit strict (both must be successful).
-    # Changed to proceed if at least one WSS client has an active connection object.
     if kalshi_wss.ws or polymarket_wss.websocket:
-        # Start listening in the background
         tasks = []
         if kalshi_wss.ws:
             tasks.append(asyncio.create_task(kalshi_wss.listen()))
@@ -601,33 +645,30 @@ async def main():
         else:
             logger.warning("Polymarket WebSocket connection not established.")
 
-        # Task to consume messages from the queue
-        # MODIFIED: Pass the WSS objects to the consumer
         async def message_consumer(pm_wss: PolymarketWSS, k_wss: KalshiWSS):
+            # Give a small delay to allow initial messages to populate some order books
+            # This is not guaranteed, but gives a better chance for initial state.
+            await asyncio.sleep(5) 
+            # Log the initial state *after* connections are established and some data might have flowed
             while True:
                 source, message = await message_queue.get()
                 logger.debug(f"\n--- Main received message from {source} ---")
-                # MODIFIED: Pass WSS objects to process_websocket_message
                 asyncio.create_task(process_websocket_message(source, message, pm_wss, k_wss))
                 message_queue.task_done()
 
-        # MODIFIED: Create consumer task passing the WSS instances
         consumer_task = asyncio.create_task(message_consumer(polymarket_wss, kalshi_wss))
         tasks.append(consumer_task)
         
-        # Start the periodic printing task
         printer_task = asyncio.create_task(print_prices_periodically())
         tasks.append(printer_task)
 
         logger.info(f"WebSocket listeners started. Running for {RUN_DURATION_MINUTES} minutes...")
-        start_time = time.time()
         try:
             if RUN_DURATION_MINUTES is not None:
                 await asyncio.sleep(RUN_DURATION_MINUTES * 60)
                 logger.info(f"Run duration of {RUN_DURATION_MINUTES} minutes completed.")
             else:
-                # If RUN_DURATION_MINUTES is None, run indefinitely until Ctrl+C
-                await asyncio.Future() # An awaitable that never completes
+                await asyncio.Future() # Run indefinitely
         except asyncio.CancelledError:
             logger.info("Program cancelled (e.g., Ctrl+C detected or explicit stop).")
         finally:
@@ -635,16 +676,15 @@ async def main():
             for task in tasks:
                 task.cancel()
             
-            # Gather all tasks to ensure they are properly cancelled and cleaned up
             await asyncio.gather(*tasks, return_exceptions=True)
             
-            # Disconnect from WebSockets
             if kalshi_wss.ws:
                 await kalshi_wss.disconnect()
             if polymarket_wss.websocket:
                 await polymarket_wss.disconnect()
             
-            logger.info(f"Data has been continuously logged to {JSON_OUTPUT_FILE_NAME}")
+            #logger.info(f"Initial state saved to {INITIAL_STATE_FILE_NAME}")
+            logger.info(f"Order book changes saved to {ORDER_BOOK_CHANGES_FILE_NAME}")
 
     else:
         logger.error("Could not start listener, connection to ALL WebSockets failed. Exiting.")
@@ -652,16 +692,17 @@ async def main():
 
 if __name__ == "__main__":
     try:
-        # Remove the old JSON log file if it exists, to start fresh
-        try:
-            if os.path.exists(JSON_OUTPUT_FILE_NAME):
-                os.remove(JSON_OUTPUT_FILE_NAME)
-                logger.info(f"Removed old {JSON_OUTPUT_FILE_NAME} to start fresh.")
-        except Exception as e:
-            logger.warning(f"Could not remove old JSON log file: {e}")
+        # Remove old JSON log files to start fresh
+        for filename in [INITIAL_STATE_FILE_NAME, ORDER_BOOK_CHANGES_FILE_NAME]:
+            try:
+                if os.path.exists(filename):
+                    os.remove(filename)
+                    logger.info(f"Removed old {filename} to start fresh.")
+            except Exception as e:
+                logger.warning(f"Could not remove old file {filename}: {e}")
 
         asyncio.run(main())
     except KeyboardInterrupt:
-        logger.info("Program manually interrupted (Ctrl+C). Check JSON log file for data.")
+        logger.info("Program manually interrupted (Ctrl+C). Check JSON log files for data.")
     except Exception as e:
-        logger.exception("An unexpected error occurred. Check JSON log file for data.")
+        logger.exception("An unexpected error occurred. Check JSON log files for data.")

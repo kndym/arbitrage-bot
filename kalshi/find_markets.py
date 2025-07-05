@@ -96,12 +96,11 @@ def find_markets(title_string):
         cursor=response["cursor"]
         #pprint.pp(response["events"][0])
         for event in response["events"]:
-            if " vs " in event["title"]:
-                pprint.pp(event["title"])
+            if "MLB" in event["event_ticker"]:
                 for market in event["markets"]:
                     pass
                     pprint.pp(market["ticker"])
         if cursor=="":
             break
 
-find_markets("Cincinnati vs Philadelphia")
+find_markets("Tampa Bay vs Minnesota")
