@@ -1,0 +1,29 @@
+trade_id,timestamp,arbitrage_type,net_profit_per_share,trade_size,total_net_profit,fees_paid,market_a,platform_a,side_a,avg_price_a,market_b,platform_b,side_b,avg_price_b
+1,2025-07-06T00:21:02.464526+00:00,same_outcome,0.0061,272.00,1.66,3.58,Houston vs Los Angeles (HOU),Polymarket,BUY,0.7300,Houston vs Los Angeles (HOU),Kalshi,SELL,0.7493
+2,2025-07-06T00:29:26.584701+00:00,same_outcome,0.0014,446.00,0.62,7.17,Detroit vs Cleveland (CLE),Polymarket,BUY,0.3389,Detroit vs Cleveland (CLE),Kalshi,SELL,0.3563
+3,2025-07-06T00:34:15.304754+00:00,same_outcome,0.0830,10.00,0.83,0.17,Houston vs Los Angeles (HOU),Kalshi,BUY,0.6300,Houston vs Los Angeles (HOU),Polymarket,SELL,0.7300
+4,2025-07-06T00:34:15.362693+00:00,same_outcome,0.0830,10.00,0.83,0.17,Houston vs Los Angeles (LAD),Polymarket,BUY,0.2700,Houston vs Los Angeles (LAD),Kalshi,SELL,0.3700
+5,2025-07-06T00:34:16.948625+00:00,same_outcome,0.0708,260.00,18.42,4.18,Houston vs Los Angeles (LAD),Polymarket,BUY,0.2700,Houston vs Los Angeles (LAD),Kalshi,SELL,0.3569
+6,2025-07-06T00:34:17.644461+00:00,same_outcome,0.0800,2.00,0.16,0.04,Houston vs Los Angeles (LAD),Polymarket,BUY,0.2700,Houston vs Los Angeles (LAD),Kalshi,SELL,0.3700
+7,2025-07-06T00:34:17.782176+00:00,same_outcome,0.0933,12.00,1.12,0.20,Houston vs Los Angeles (LAD),Polymarket,BUY,0.2700,Houston vs Los Angeles (LAD),Kalshi,SELL,0.3800
+8,2025-07-06T00:38:32.811291+00:00,same_outcome,0.0233,100.00,2.33,1.67,Detroit vs Cleveland (DET),Kalshi,BUY,0.6100,Detroit vs Cleveland (DET),Polymarket,SELL,0.6500
+9,2025-07-06T00:38:32.831248+00:00,same_outcome,0.0331,100.00,3.31,1.69,Detroit vs Cleveland (DET),Kalshi,BUY,0.6000,Detroit vs Cleveland (DET),Polymarket,SELL,0.6500
+10,2025-07-06T00:38:32.849902+00:00,same_outcome,0.0233,100.00,2.33,1.67,Detroit vs Cleveland (DET),Kalshi,BUY,0.6100,Detroit vs Cleveland (DET),Polymarket,SELL,0.6500
+11,2025-07-06T00:38:32.870628+00:00,same_outcome,0.0642,1895.20,121.70,33.05,Detroit vs Cleveland (CLE),Polymarket,BUY,0.3883,Detroit vs Cleveland (CLE),Kalshi,SELL,0.4700
+12,2025-07-06T00:38:33.030260+00:00,same_outcome,0.0331,62.00,2.05,1.05,Detroit vs Cleveland (DET),Kalshi,BUY,0.6000,Detroit vs Cleveland (DET),Polymarket,SELL,0.6500
+13,2025-07-06T00:38:33.070254+00:00,same_outcome,0.0625,8.00,0.50,0.14,Detroit vs Cleveland (DET),Kalshi,BUY,0.5700,Detroit vs Cleveland (DET),Polymarket,SELL,0.6500
+14,2025-07-06T00:38:33.170798+00:00,same_outcome,0.0331,62.00,2.05,1.05,Detroit vs Cleveland (DET),Kalshi,BUY,0.6000,Detroit vs Cleveland (DET),Polymarket,SELL,0.6500
+15,2025-07-06T00:38:33.632425+00:00,same_outcome,0.0331,62.00,2.05,1.05,Detroit vs Cleveland (DET),Kalshi,BUY,0.6000,Detroit vs Cleveland (DET),Polymarket,SELL,0.6500
+16,2025-07-06T00:38:33.830321+00:00,same_outcome,0.0331,100.00,3.31,1.69,Detroit vs Cleveland (DET),Kalshi,BUY,0.6000,Detroit vs Cleveland (DET),Polymarket,SELL,0.6500
+17,2025-07-06T00:38:33.874365+00:00,same_outcome,0.0331,62.00,2.05,1.05,Detroit vs Cleveland (DET),Kalshi,BUY,0.6000,Detroit vs Cleveland (DET),Polymarket,SELL,0.6500
+18,2025-07-06T00:38:33.890855+00:00,same_outcome,0.0431,62.00,2.67,1.05,Detroit vs Cleveland (DET),Kalshi,BUY,0.5900,Detroit vs Cleveland (DET),Polymarket,SELL,0.6500
+19,2025-07-06T00:38:33.950521+00:00,same_outcome,0.0430,100.00,4.30,1.70,Detroit vs Cleveland (DET),Kalshi,BUY,0.5900,Detroit vs Cleveland (DET),Polymarket,SELL,0.6500
+20,2025-07-06T00:38:37.110500+00:00,same_outcome,0.0228,117.00,2.67,2.01,Detroit vs Cleveland (CLE),Kalshi,BUY,0.4300,Detroit vs Cleveland (CLE),Polymarket,SELL,0.4700
+21,2025-07-06T00:42:59.938278+00:00,same_outcome,0.0075,475.65,3.59,6.86,Detroit vs Cleveland (CLE),Kalshi,BUY,0.2900,Detroit vs Cleveland (CLE),Polymarket,SELL,0.3120
+22,2025-07-06T00:43:00.015436+00:00,same_outcome,0.0075,475.65,3.59,6.86,Detroit vs Cleveland (DET),Polymarket,BUY,0.6880,Detroit vs Cleveland (DET),Kalshi,SELL,0.7100
+23,2025-07-06T00:43:00.221348+00:00,same_outcome,0.0256,279.00,7.13,4.03,Detroit vs Cleveland (CLE),Kalshi,BUY,0.2900,Detroit vs Cleveland (CLE),Polymarket,SELL,0.3300
+24,2025-07-06T00:43:00.221903+00:00,same_outcome,0.0256,279.00,7.13,4.03,Detroit vs Cleveland (DET),Polymarket,BUY,0.6700,Detroit vs Cleveland (DET),Kalshi,SELL,0.7100
+25,2025-07-06T00:43:00.834952+00:00,same_outcome,0.0240,5.00,0.12,0.08,Detroit vs Cleveland (DET),Polymarket,BUY,0.6700,Detroit vs Cleveland (DET),Kalshi,SELL,0.7100
+26,2025-07-06T00:43:00.836103+00:00,same_outcome,0.0240,5.00,0.12,0.08,Detroit vs Cleveland (CLE),Kalshi,BUY,0.2900,Detroit vs Cleveland (CLE),Polymarket,SELL,0.3300
+27,2025-07-06T00:57:59.409810+00:00,same_outcome,0.0160,10.00,0.16,0.14,Detroit vs Cleveland (DET),Polymarket,BUY,0.7200,Detroit vs Cleveland (DET),Kalshi,SELL,0.7500
+28,2025-07-06T00:57:59.912204+00:00,same_outcome,0.0370,10.00,0.37,0.13,Detroit vs Cleveland (CLE),Kalshi,BUY,0.2300,Detroit vs Cleveland (CLE),Polymarket,SELL,0.2800

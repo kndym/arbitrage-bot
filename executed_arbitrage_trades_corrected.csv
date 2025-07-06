@@ -1,0 +1,227 @@
+trade_id,timestamp,arbitrage_type,net_profit_per_share,trade_size,total_net_profit,fees_paid,market_a,platform_a,side_a,avg_price_a,market_b,platform_b,side_b,avg_price_b
+1,2025-07-06T00:21:02.464526+00:00,same_outcome,0.0061,272.00,1.66,3.58,Houston vs Los Angeles (HOU),Polymarket,BUY,0.7300,Houston vs Los Angeles (HOU),Kalshi,SELL,0.7493
+2,2025-07-06T00:29:26.584701+00:00,same_outcome,0.0014,446.00,0.62,7.17,Detroit vs Cleveland (CLE),Polymarket,BUY,0.3389,Detroit vs Cleveland (CLE),Kalshi,SELL,0.3563
+3,2025-07-06T00:34:08.766304+00:00,same_outcome,-0.0178,3742.78,-66.70,51.93,Houston vs Los Angeles (LAD),Polymarket,BUY,0.2763,Houston vs Los Angeles (LAD),Kalshi,SELL,0.2724
+4,2025-07-06T00:34:08.964281+00:00,same_outcome,-0.0076,2230.45,-16.96,30.81,Houston vs Los Angeles (HOU),Kalshi,BUY,0.7296,Houston vs Los Angeles (HOU),Polymarket,SELL,0.7358
+5,2025-07-06T00:34:10.045089+00:00,same_outcome,-0.0046,1301.45,-6.04,20.99,Houston vs Los Angeles (LAD),Polymarket,BUY,0.3485,Houston vs Los Angeles (LAD),Kalshi,SELL,0.3600
+6,2025-07-06T00:34:10.184396+00:00,same_outcome,-0.0187,2813.78,-52.70,42.55,Houston vs Los Angeles (HOU),Kalshi,BUY,0.6843,Houston vs Los Angeles (HOU),Polymarket,SELL,0.6807
+7,2025-07-06T00:34:14.848486+00:00,same_outcome,-0.0021,699.77,-1.50,9.92,Houston vs Los Angeles (LAD),Polymarket,BUY,0.2700,Houston vs Los Angeles (LAD),Kalshi,SELL,0.2820
+8,2025-07-06T00:34:14.848979+00:00,same_outcome,-0.0100,173.77,-1.74,2.42,Houston vs Los Angeles (HOU),Kalshi,BUY,0.7261,Houston vs Los Angeles (HOU),Polymarket,SELL,0.7300
+9,2025-07-06T00:34:15.304754+00:00,same_outcome,0.0830,10.00,0.83,0.17,Houston vs Los Angeles (HOU),Kalshi,BUY,0.6300,Houston vs Los Angeles (HOU),Polymarket,SELL,0.7300
+10,2025-07-06T00:34:15.362693+00:00,same_outcome,0.0830,10.00,0.83,0.17,Houston vs Los Angeles (LAD),Polymarket,BUY,0.2700,Houston vs Los Angeles (LAD),Kalshi,SELL,0.3700
+11,2025-07-06T00:34:15.542102+00:00,same_outcome,-0.0085,72.00,-0.61,1.01,Houston vs Los Angeles (HOU),Kalshi,BUY,0.7244,Houston vs Los Angeles (HOU),Polymarket,SELL,0.7300
+12,2025-07-06T00:34:16.948625+00:00,same_outcome,0.0708,260.00,18.42,4.18,Houston vs Los Angeles (LAD),Polymarket,BUY,0.2700,Houston vs Los Angeles (LAD),Kalshi,SELL,0.3569
+13,2025-07-06T00:34:17.644461+00:00,same_outcome,0.0800,2.00,0.16,0.04,Houston vs Los Angeles (LAD),Polymarket,BUY,0.2700,Houston vs Los Angeles (LAD),Kalshi,SELL,0.3700
+14,2025-07-06T00:34:17.782176+00:00,same_outcome,0.0933,12.00,1.12,0.20,Houston vs Los Angeles (LAD),Polymarket,BUY,0.2700,Houston vs Los Angeles (LAD),Kalshi,SELL,0.3800
+15,2025-07-06T00:38:32.811291+00:00,same_outcome,0.0233,100.00,2.33,1.67,Detroit vs Cleveland (DET),Kalshi,BUY,0.6100,Detroit vs Cleveland (DET),Polymarket,SELL,0.6500
+16,2025-07-06T00:38:32.831248+00:00,same_outcome,0.0331,100.00,3.31,1.69,Detroit vs Cleveland (DET),Kalshi,BUY,0.6000,Detroit vs Cleveland (DET),Polymarket,SELL,0.6500
+17,2025-07-06T00:38:32.849902+00:00,same_outcome,0.0233,100.00,2.33,1.67,Detroit vs Cleveland (DET),Kalshi,BUY,0.6100,Detroit vs Cleveland (DET),Polymarket,SELL,0.6500
+18,2025-07-06T00:38:32.870628+00:00,same_outcome,0.0642,1895.20,121.70,33.05,Detroit vs Cleveland (CLE),Polymarket,BUY,0.3883,Detroit vs Cleveland (CLE),Kalshi,SELL,0.4700
+19,2025-07-06T00:38:33.030260+00:00,same_outcome,0.0331,62.00,2.05,1.05,Detroit vs Cleveland (DET),Kalshi,BUY,0.6000,Detroit vs Cleveland (DET),Polymarket,SELL,0.6500
+20,2025-07-06T00:38:33.070254+00:00,same_outcome,0.0625,8.00,0.50,0.14,Detroit vs Cleveland (DET),Kalshi,BUY,0.5700,Detroit vs Cleveland (DET),Polymarket,SELL,0.6500
+21,2025-07-06T00:38:33.170798+00:00,same_outcome,0.0331,62.00,2.05,1.05,Detroit vs Cleveland (DET),Kalshi,BUY,0.6000,Detroit vs Cleveland (DET),Polymarket,SELL,0.6500
+22,2025-07-06T00:38:33.632425+00:00,same_outcome,0.0331,62.00,2.05,1.05,Detroit vs Cleveland (DET),Kalshi,BUY,0.6000,Detroit vs Cleveland (DET),Polymarket,SELL,0.6500
+23,2025-07-06T00:38:33.830321+00:00,same_outcome,0.0331,100.00,3.31,1.69,Detroit vs Cleveland (DET),Kalshi,BUY,0.6000,Detroit vs Cleveland (DET),Polymarket,SELL,0.6500
+24,2025-07-06T00:38:33.874365+00:00,same_outcome,0.0331,62.00,2.05,1.05,Detroit vs Cleveland (DET),Kalshi,BUY,0.6000,Detroit vs Cleveland (DET),Polymarket,SELL,0.6500
+25,2025-07-06T00:38:33.890855+00:00,same_outcome,0.0431,62.00,2.67,1.05,Detroit vs Cleveland (DET),Kalshi,BUY,0.5900,Detroit vs Cleveland (DET),Polymarket,SELL,0.6500
+26,2025-07-06T00:38:33.950521+00:00,same_outcome,0.0430,100.00,4.30,1.70,Detroit vs Cleveland (DET),Kalshi,BUY,0.5900,Detroit vs Cleveland (DET),Polymarket,SELL,0.6500
+27,2025-07-06T00:38:37.110500+00:00,same_outcome,0.0228,117.00,2.67,2.01,Detroit vs Cleveland (CLE),Kalshi,BUY,0.4300,Detroit vs Cleveland (CLE),Polymarket,SELL,0.4700
+28,2025-07-06T00:42:59.938278+00:00,same_outcome,0.0075,475.65,3.59,6.86,Detroit vs Cleveland (CLE),Kalshi,BUY,0.2900,Detroit vs Cleveland (CLE),Polymarket,SELL,0.3120
+29,2025-07-06T00:43:00.015436+00:00,same_outcome,0.0075,475.65,3.59,6.86,Detroit vs Cleveland (DET),Polymarket,BUY,0.6880,Detroit vs Cleveland (DET),Kalshi,SELL,0.7100
+30,2025-07-06T00:43:00.221348+00:00,same_outcome,0.0256,279.00,7.13,4.03,Detroit vs Cleveland (CLE),Kalshi,BUY,0.2900,Detroit vs Cleveland (CLE),Polymarket,SELL,0.3300
+31,2025-07-06T00:43:00.221903+00:00,same_outcome,0.0256,279.00,7.13,4.03,Detroit vs Cleveland (DET),Polymarket,BUY,0.6700,Detroit vs Cleveland (DET),Kalshi,SELL,0.7100
+32,2025-07-06T00:43:00.834952+00:00,same_outcome,0.0240,5.00,0.12,0.08,Detroit vs Cleveland (DET),Polymarket,BUY,0.6700,Detroit vs Cleveland (DET),Kalshi,SELL,0.7100
+33,2025-07-06T00:43:00.836103+00:00,same_outcome,0.0240,5.00,0.12,0.08,Detroit vs Cleveland (CLE),Kalshi,BUY,0.2900,Detroit vs Cleveland (CLE),Polymarket,SELL,0.3300
+34,2025-07-06T00:57:59.409810+00:00,same_outcome,0.0160,10.00,0.16,0.14,Detroit vs Cleveland (DET),Polymarket,BUY,0.7200,Detroit vs Cleveland (DET),Kalshi,SELL,0.7500
+35,2025-07-06T00:57:59.912204+00:00,same_outcome,0.0370,10.00,0.37,0.13,Detroit vs Cleveland (CLE),Kalshi,BUY,0.2300,Detroit vs Cleveland (CLE),Polymarket,SELL,0.2800
+36,2025-07-06T01:16:40.071285+00:00,same_outcome,0.0230,1355.78,31.17,22.96,Chicago vs Colorado (COL),Kalshi,BUY,0.4100,Chicago vs Colorado (COL),Polymarket,SELL,0.4499
+37,2025-07-06T01:16:40.131995+00:00,same_outcome,0.0230,1355.78,31.17,22.96,Chicago vs Colorado (CWS),Polymarket,BUY,0.5501,Chicago vs Colorado (CWS),Kalshi,SELL,0.5900
+38,2025-07-06T01:16:40.706591+00:00,same_outcome,0.0230,434.78,10.02,7.37,Chicago vs Colorado (CWS),Polymarket,BUY,0.5500,Chicago vs Colorado (CWS),Kalshi,SELL,0.5900
+39,2025-07-06T01:16:40.707534+00:00,same_outcome,0.0230,434.78,10.02,7.37,Chicago vs Colorado (COL),Kalshi,BUY,0.4100,Chicago vs Colorado (COL),Polymarket,SELL,0.4500
+40,2025-07-06T01:16:42.786488+00:00,same_outcome,0.0202,36.88,0.75,0.63,Chicago vs Colorado (COL),Kalshi,BUY,0.4100,Chicago vs Colorado (COL),Polymarket,SELL,0.4473
+41,2025-07-06T01:16:42.787365+00:00,same_outcome,0.0202,36.88,0.75,0.63,Chicago vs Colorado (CWS),Polymarket,BUY,0.5527,Chicago vs Colorado (CWS),Kalshi,SELL,0.5900
+42,2025-07-06T01:21:13.698818+00:00,same_outcome,0.0138,99.00,1.37,1.69,Chicago vs Colorado (CWS),Kalshi,BUY,0.4200,Chicago vs Colorado (CWS),Polymarket,SELL,0.4509
+43,2025-07-06T01:21:13.716892+00:00,same_outcome,0.0099,69.00,0.68,1.18,Chicago vs Colorado (CWS),Kalshi,BUY,0.4200,Chicago vs Colorado (CWS),Polymarket,SELL,0.4470
+44,2025-07-06T01:22:16.798378+00:00,same_outcome,0.0350,12.00,0.42,0.20,Chicago vs Colorado (CWS),Polymarket,BUY,0.3200,Chicago vs Colorado (CWS),Kalshi,SELL,0.3717
+45,2025-07-06T01:22:16.798850+00:00,same_outcome,0.0126,31.00,0.39,0.50,Chicago vs Colorado (COL),Kalshi,BUY,0.6513,Chicago vs Colorado (COL),Polymarket,SELL,0.6800
+46,2025-07-06T01:25:36.967636+00:00,same_outcome,0.0960,1226.00,117.74,21.26,Houston vs Los Angeles (LAD),Polymarket,BUY,0.4353,Houston vs Los Angeles (LAD),Kalshi,SELL,0.5487
+47,2025-07-06T01:25:37.066058+00:00,same_outcome,0.0223,860.05,19.22,15.03,Houston vs Los Angeles (LAD),Polymarket,BUY,0.4402,Houston vs Los Angeles (LAD),Kalshi,SELL,0.4800
+48,2025-07-06T01:25:37.105632+00:00,same_outcome,0.0699,1713.00,119.79,29.91,Houston vs Los Angeles (HOU),Kalshi,BUY,0.4759,Houston vs Los Angeles (HOU),Polymarket,SELL,0.5633
+49,2025-07-06T01:25:37.165235+00:00,same_outcome,0.0221,373.05,8.25,6.52,Houston vs Los Angeles (HOU),Kalshi,BUY,0.5200,Houston vs Los Angeles (HOU),Polymarket,SELL,0.5596
+50,2025-07-06T01:25:38.673883+00:00,same_outcome,0.0504,145.05,7.31,2.54,Houston vs Los Angeles (LAD),Polymarket,BUY,0.4121,Houston vs Los Angeles (LAD),Kalshi,SELL,0.4800
+51,2025-07-06T01:25:38.674437+00:00,same_outcome,0.0504,145.05,7.31,2.54,Houston vs Los Angeles (HOU),Kalshi,BUY,0.5200,Houston vs Los Angeles (HOU),Polymarket,SELL,0.5879
+52,2025-07-06T01:25:38.777685+00:00,same_outcome,0.0493,95.05,4.68,1.67,Houston vs Los Angeles (HOU),Kalshi,BUY,0.5200,Houston vs Los Angeles (HOU),Polymarket,SELL,0.5868
+53,2025-07-06T01:25:38.778536+00:00,same_outcome,0.0493,95.05,4.68,1.67,Houston vs Los Angeles (LAD),Polymarket,BUY,0.4132,Houston vs Los Angeles (LAD),Kalshi,SELL,0.4800
+54,2025-07-06T01:25:43.186326+00:00,same_outcome,0.0270,10.00,0.27,0.18,Houston vs Los Angeles (LAD),Polymarket,BUY,0.5150,Houston vs Los Angeles (LAD),Kalshi,SELL,0.5600
+55,2025-07-06T01:26:04.906115+00:00,same_outcome,0.0775,409.15,31.71,6.75,Houston vs Los Angeles (LAD),Kalshi,BUY,0.3800,Houston vs Los Angeles (LAD),Polymarket,SELL,0.4740
+56,2025-07-06T01:26:04.946836+00:00,same_outcome,0.0671,247.86,16.62,4.09,Houston vs Los Angeles (LAD),Kalshi,BUY,0.3800,Houston vs Los Angeles (LAD),Polymarket,SELL,0.4636
+57,2025-07-06T01:26:04.984668+00:00,same_outcome,0.0671,247.86,16.62,4.09,Houston vs Los Angeles (HOU),Polymarket,BUY,0.5364,Houston vs Los Angeles (HOU),Kalshi,SELL,0.6200
+58,2025-07-06T01:26:05.048268+00:00,same_outcome,0.0162,174.00,2.82,2.87,Houston vs Los Angeles (HOU),Polymarket,BUY,0.5873,Houston vs Los Angeles (HOU),Kalshi,SELL,0.6200
+59,2025-07-06T01:26:05.048712+00:00,same_outcome,0.0162,174.00,2.82,2.87,Houston vs Los Angeles (LAD),Kalshi,BUY,0.3800,Houston vs Los Angeles (LAD),Polymarket,SELL,0.4127
+60,2025-07-06T01:26:49.157044+00:00,same_outcome,-0.0112,266.00,-2.98,4.14,Houston vs Los Angeles (LAD),Polymarket,BUY,0.3281,Houston vs Los Angeles (LAD),Kalshi,SELL,0.3325
+61,2025-07-06T01:31:01.702726+00:00,same_outcome,0.0237,8.00,0.19,0.11,Houston vs Los Angeles (HOU),Kalshi,BUY,0.7625,Houston vs Los Angeles (HOU),Polymarket,SELL,0.8000
+62,2025-07-06T01:31:01.703909+00:00,same_outcome,0.0262,8.00,0.21,0.11,Houston vs Los Angeles (LAD),Polymarket,BUY,0.2000,Houston vs Los Angeles (LAD),Kalshi,SELL,0.2400
+63,2025-07-06T01:31:01.704531+00:00,same_outcome,0.0175,8.00,0.14,0.10,Houston vs Los Angeles (HOU),Kalshi,BUY,0.7700,Houston vs Los Angeles (HOU),Polymarket,SELL,0.8000
+64,2025-07-06T01:31:01.704960+00:00,same_outcome,0.0200,8.00,0.16,0.10,Houston vs Los Angeles (LAD),Polymarket,BUY,0.2000,Houston vs Los Angeles (LAD),Kalshi,SELL,0.2325
+65,2025-07-06T01:31:02.672564+00:00,same_outcome,0.1831,58.00,10.62,0.98,Houston vs Los Angeles (LAD),Polymarket,BUY,0.2000,Houston vs Los Angeles (LAD),Kalshi,SELL,0.4000
+66,2025-07-06T01:31:02.768292+00:00,same_outcome,0.0107,44.00,0.47,0.54,Houston vs Los Angeles (HOU),Kalshi,BUY,0.7770,Houston vs Los Angeles (HOU),Polymarket,SELL,0.8000
+67,2025-07-06T01:31:02.818196+00:00,same_outcome,0.0886,779.00,69.02,13.04,Houston vs Los Angeles (LAD),Polymarket,BUY,0.2900,Houston vs Los Angeles (LAD),Kalshi,SELL,0.3953
+68,2025-07-06T01:31:03.033211+00:00,same_outcome,0.0932,1392.00,129.73,23.39,Houston vs Los Angeles (HOU),Kalshi,BUY,0.6000,Houston vs Los Angeles (HOU),Polymarket,SELL,0.7100
+69,2025-07-06T01:31:03.086890+00:00,same_outcome,0.0732,31.00,2.27,0.52,Houston vs Los Angeles (HOU),Kalshi,BUY,0.6200,Houston vs Los Angeles (HOU),Polymarket,SELL,0.7100
+70,2025-07-06T01:33:03.563237+00:00,same_outcome,-0.0081,2299.00,-18.55,22.91,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8281,Houston vs Los Angeles (HOU),Polymarket,SELL,0.8300
+71,2025-07-06T01:33:04.706281+00:00,same_outcome,-0.0135,334.00,-4.51,3.23,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8349,Houston vs Los Angeles (HOU),Polymarket,SELL,0.8310
+72,2025-07-06T01:33:12.563572+00:00,same_outcome,0.0048,2202.00,10.67,23.29,Houston vs Los Angeles (LAD),Polymarket,BUY,0.1700,Houston vs Los Angeles (LAD),Kalshi,SELL,0.1854
+73,2025-07-06T01:33:13.182887+00:00,same_outcome,0.0157,119.00,1.87,1.32,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8032,Houston vs Los Angeles (HOU),Polymarket,SELL,0.8300
+74,2025-07-06T01:33:14.643801+00:00,same_outcome,0.0326,2299.00,74.84,27.11,Houston vs Los Angeles (HOU),Kalshi,BUY,0.7857,Houston vs Los Angeles (HOU),Polymarket,SELL,0.8300
+75,2025-07-06T01:33:14.663271+00:00,same_outcome,0.0379,2005.00,75.99,24.08,Houston vs Los Angeles (LAD),Polymarket,BUY,0.1700,Houston vs Los Angeles (LAD),Kalshi,SELL,0.2199
+76,2025-07-06T01:33:15.161581+00:00,same_outcome,0.0174,700.00,12.20,7.80,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8014,Houston vs Los Angeles (HOU),Polymarket,SELL,0.8300
+77,2025-07-06T01:33:15.302404+00:00,same_outcome,0.0180,10.00,0.18,0.12,Houston vs Los Angeles (LAD),Polymarket,BUY,0.1700,Houston vs Los Angeles (LAD),Kalshi,SELL,0.2000
+78,2025-07-06T01:33:15.902486+00:00,same_outcome,0.0330,10.00,0.33,0.17,Chicago vs Colorado (COL),Kalshi,BUY,0.3700,Chicago vs Colorado (COL),Polymarket,SELL,0.4200
+79,2025-07-06T01:35:49.941415+00:00,same_outcome,0.0150,2.00,0.03,0.03,Houston vs Los Angeles (HOU),Kalshi,BUY,0.7400,Houston vs Los Angeles (HOU),Polymarket,SELL,0.7700
+80,2025-07-06T01:35:50.649307+00:00,same_outcome,0.0327,1200.02,39.20,7.49,Houston vs Los Angeles (LAD),Polymarket,BUY,0.0600,Houston vs Los Angeles (LAD),Kalshi,SELL,0.0989
+81,2025-07-06T01:35:50.649943+00:00,same_outcome,0.0083,715.00,5.94,3.39,Houston vs Los Angeles (HOU),Kalshi,BUY,0.9270,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9400
+82,2025-07-06T01:35:51.232445+00:00,same_outcome,0.0080,219.98,1.76,1.04,Houston vs Los Angeles (LAD),Polymarket,BUY,0.0600,Houston vs Los Angeles (LAD),Kalshi,SELL,0.0727
+83,2025-07-06T01:35:51.453889+00:00,same_outcome,0.0900,12.00,1.08,0.12,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8400,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9400
+84,2025-07-06T01:35:51.557589+00:00,same_outcome,0.1090,10.00,1.09,0.11,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8200,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9400
+85,2025-07-06T01:35:51.561861+00:00,same_outcome,0.0808,12.00,0.97,0.11,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8500,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9400
+86,2025-07-06T01:35:54.032970+00:00,same_outcome,0.1050,2.00,0.21,0.03,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8200,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9400
+87,2025-07-06T01:35:54.453498+00:00,same_outcome,0.1001,900.00,90.11,8.89,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8300,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9400
+88,2025-07-06T01:35:54.555296+00:00,same_outcome,0.0905,100.00,9.05,0.95,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8400,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9400
+89,2025-07-06T01:35:55.031453+00:00,same_outcome,0.0906,1130.02,102.36,10.64,Houston vs Los Angeles (LAD),Polymarket,BUY,0.0600,Houston vs Los Angeles (LAD),Kalshi,SELL,0.1600
+90,2025-07-06T01:35:55.054000+00:00,same_outcome,0.0811,1130.02,91.61,10.09,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8500,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9400
+91,2025-07-06T01:36:36.556222+00:00,same_outcome,-0.0160,3991.00,-63.71,42.65,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8120,Houston vs Los Angeles (HOU),Polymarket,SELL,0.8067
+92,2025-07-06T01:37:00.987874+00:00,same_outcome,0.0047,37.51,0.18,0.40,Houston vs Los Angeles (LAD),Polymarket,BUY,0.1673,Houston vs Los Angeles (LAD),Kalshi,SELL,0.1827
+93,2025-07-06T01:41:12.518826+00:00,same_outcome,-0.0089,1921.91,-17.05,22.33,Houston vs Los Angeles (LAD),Polymarket,BUY,0.2073,Houston vs Los Angeles (LAD),Kalshi,SELL,0.2101
+94,2025-07-06T01:41:17.431510+00:00,same_outcome,-0.0005,4089.09,-2.03,45.84,Houston vs Los Angeles (LAD),Polymarket,BUY,0.1895,Houston vs Los Angeles (LAD),Kalshi,SELL,0.2002
+95,2025-07-06T01:41:17.432235+00:00,same_outcome,0.0039,4798.00,18.60,54.71,Houston vs Los Angeles (HOU),Kalshi,BUY,0.7952,Houston vs Los Angeles (HOU),Polymarket,SELL,0.8104
+96,2025-07-06T01:41:17.477293+00:00,same_outcome,0.0175,4.00,0.07,0.05,Houston vs Los Angeles (HOU),Kalshi,BUY,0.7800,Houston vs Los Angeles (HOU),Polymarket,SELL,0.8100
+97,2025-07-06T01:41:18.582259+00:00,same_outcome,-0.0000,520.00,-0.02,4.62,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8512,Houston vs Los Angeles (HOU),Polymarket,SELL,0.8600
+98,2025-07-06T01:41:18.677823+00:00,same_outcome,0.0222,256.00,5.68,2.56,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8278,Houston vs Los Angeles (HOU),Polymarket,SELL,0.8600
+99,2025-07-06T01:41:19.156603+00:00,same_outcome,0.0201,100.00,2.01,0.99,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8300,Houston vs Los Angeles (HOU),Polymarket,SELL,0.8600
+100,2025-07-06T01:41:19.295845+00:00,same_outcome,0.0106,200.00,2.11,1.89,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8400,Houston vs Los Angeles (HOU),Polymarket,SELL,0.8600
+101,2025-07-06T01:41:19.657950+00:00,same_outcome,0.0200,9.00,0.18,0.09,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8300,Houston vs Los Angeles (HOU),Polymarket,SELL,0.8600
+102,2025-07-06T01:42:34.733999+00:00,same_outcome,0.0220,10.00,0.22,0.18,Texas vs San Diego (TEX),Polymarket,BUY,0.4600,Texas vs San Diego (TEX),Kalshi,SELL,0.5000
+103,2025-07-06T01:42:34.816733+00:00,same_outcome,0.0130,10.00,0.13,0.18,Texas vs San Diego (SD),Kalshi,BUY,0.5090,Texas vs San Diego (SD),Polymarket,SELL,0.5400
+104,2025-07-06T01:43:29.670056+00:00,same_outcome,0.0528,1656.00,87.38,17.85,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8100,Houston vs Los Angeles (HOU),Polymarket,SELL,0.8735
+105,2025-07-06T01:43:29.730765+00:00,same_outcome,0.0534,1410.00,75.28,15.19,Houston vs Los Angeles (LAD),Polymarket,BUY,0.1258,Houston vs Los Angeles (LAD),Kalshi,SELL,0.1900
+106,2025-07-06T01:43:29.791918+00:00,same_outcome,0.0414,1728.00,71.56,18.46,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8122,Houston vs Los Angeles (HOU),Polymarket,SELL,0.8642
+107,2025-07-06T01:43:29.812000+00:00,same_outcome,0.0470,1666.00,78.23,17.95,Houston vs Los Angeles (LAD),Polymarket,BUY,0.1323,Houston vs Los Angeles (LAD),Kalshi,SELL,0.1900
+108,2025-07-06T01:43:31.389798+00:00,same_outcome,0.0197,520.00,10.22,5.38,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8200,Houston vs Los Angeles (HOU),Polymarket,SELL,0.8500
+109,2025-07-06T01:43:31.391046+00:00,same_outcome,0.0197,520.00,10.22,5.38,Houston vs Los Angeles (LAD),Polymarket,BUY,0.1500,Houston vs Los Angeles (LAD),Kalshi,SELL,0.1800
+110,2025-07-06T01:44:31.068074+00:00,same_outcome,-0.0079,572.00,-4.51,6.32,Houston vs Los Angeles (LAD),Polymarket,BUY,0.1931,Houston vs Los Angeles (LAD),Kalshi,SELL,0.1962
+111,2025-07-06T01:44:33.510401+00:00,same_outcome,0.0017,1222.00,2.03,14.24,Houston vs Los Angeles (HOU),Kalshi,BUY,0.7890,Houston vs Los Angeles (HOU),Polymarket,SELL,0.8023
+112,2025-07-06T01:44:34.347322+00:00,same_outcome,0.0091,285.00,2.60,3.50,Houston vs Los Angeles (HOU),Kalshi,BUY,0.7735,Houston vs Los Angeles (HOU),Polymarket,SELL,0.7949
+113,2025-07-06T01:44:36.575693+00:00,same_outcome,-0.0362,2008.00,-72.77,22.78,Houston vs Los Angeles (HOU),Kalshi,BUY,0.7965,Houston vs Los Angeles (HOU),Polymarket,SELL,0.7716
+114,2025-07-06T01:44:36.576143+00:00,same_outcome,0.0356,55.00,1.96,0.66,Houston vs Los Angeles (LAD),Polymarket,BUY,0.1700,Houston vs Los Angeles (LAD),Kalshi,SELL,0.2176
+115,2025-07-06T01:46:22.328265+00:00,same_outcome,-0.0005,88.00,-0.05,1.19,Houston vs Los Angeles (LAD),Polymarket,BUY,0.2471,Houston vs Los Angeles (LAD),Kalshi,SELL,0.2601
+116,2025-07-06T01:52:09.205035+00:00,same_outcome,0.0329,41.00,1.35,0.29,Houston vs Los Angeles (LAD),Kalshi,BUY,0.1100,Houston vs Los Angeles (LAD),Polymarket,SELL,0.1500
+117,2025-07-06T01:52:10.023123+00:00,same_outcome,0.0065,1535.00,9.97,9.68,Houston vs Los Angeles (LAD),Kalshi,BUY,0.1000,Houston vs Los Angeles (LAD),Polymarket,SELL,0.1128
+118,2025-07-06T01:52:10.122795+00:00,same_outcome,0.0063,1665.00,10.46,10.49,Houston vs Los Angeles (HOU),Polymarket,BUY,0.8874,Houston vs Los Angeles (HOU),Kalshi,SELL,0.9000
+119,2025-07-06T02:01:03.676789+00:00,same_outcome,-0.0280,1073.00,-30.03,5.58,Houston vs Los Angeles (LAD),Polymarket,BUY,0.1035,Houston vs Los Angeles (LAD),Kalshi,SELL,0.0807
+120,2025-07-06T02:02:26.592926+00:00,same_outcome,-0.0102,1579.00,-16.14,8.39,Houston vs Los Angeles (LAD),Polymarket,BUY,0.0877,Houston vs Los Angeles (LAD),Kalshi,SELL,0.0827
+121,2025-07-06T02:03:08.992608+00:00,same_outcome,0.0217,2128.00,46.28,19.00,Houston vs Los Angeles (LAD),Polymarket,BUY,0.1193,Houston vs Los Angeles (LAD),Kalshi,SELL,0.1500
+122,2025-07-06T02:03:09.092675+00:00,same_outcome,0.0178,3426.00,60.95,30.58,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8500,Houston vs Los Angeles (HOU),Polymarket,SELL,0.8767
+123,2025-07-06T02:03:09.452604+00:00,same_outcome,0.0304,995.00,30.26,9.83,Houston vs Los Angeles (LAD),Polymarket,BUY,0.1297,Houston vs Los Angeles (LAD),Kalshi,SELL,0.1700
+124,2025-07-06T02:03:09.612210+00:00,same_outcome,0.0301,1124.00,33.85,11.11,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8300,Houston vs Los Angeles (HOU),Polymarket,SELL,0.8700
+125,2025-07-06T02:03:11.313830+00:00,same_outcome,0.0113,1065.00,11.99,5.91,Houston vs Los Angeles (HOU),Kalshi,BUY,0.9132,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+126,2025-07-06T02:03:11.314280+00:00,same_outcome,0.0235,62.00,1.46,0.40,Houston vs Los Angeles (LAD),Polymarket,BUY,0.0700,Houston vs Los Angeles (LAD),Kalshi,SELL,0.1000
+127,2025-07-06T02:03:11.450234+00:00,same_outcome,0.0237,386.00,9.14,2.44,Houston vs Los Angeles (HOU),Kalshi,BUY,0.9000,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+128,2025-07-06T02:03:11.611079+00:00,same_outcome,0.0237,300.00,7.10,1.89,Houston vs Los Angeles (HOU),Kalshi,BUY,0.9000,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+129,2025-07-06T02:03:11.969815+00:00,same_outcome,0.0200,1.00,0.02,0.01,Houston vs Los Angeles (LAD),Polymarket,BUY,0.0700,Houston vs Los Angeles (LAD),Kalshi,SELL,0.1000
+130,2025-07-06T02:03:12.550709+00:00,same_outcome,0.0235,62.00,1.46,0.40,Houston vs Los Angeles (LAD),Polymarket,BUY,0.0700,Houston vs Los Angeles (LAD),Kalshi,SELL,0.1000
+131,2025-07-06T02:03:12.551145+00:00,same_outcome,0.0235,62.00,1.46,0.40,Houston vs Los Angeles (HOU),Kalshi,BUY,0.9000,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+132,2025-07-06T02:03:13.430363+00:00,same_outcome,0.0292,486.00,14.21,3.23,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8941,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+133,2025-07-06T02:03:13.609188+00:00,same_outcome,0.0331,299.00,9.91,2.05,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8900,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+134,2025-07-06T02:03:14.301230+00:00,same_outcome,0.0900,7.00,0.63,0.07,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8300,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+135,2025-07-06T02:03:14.349926+00:00,same_outcome,0.0700,3.00,0.21,0.03,Houston vs Los Angeles (LAD),Polymarket,BUY,0.0700,Houston vs Los Angeles (LAD),Kalshi,SELL,0.1500
+136,2025-07-06T02:03:14.392152+00:00,same_outcome,0.0237,100.00,2.37,0.63,Houston vs Los Angeles (HOU),Kalshi,BUY,0.9000,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+137,2025-07-06T02:03:14.570967+00:00,same_outcome,0.0237,100.00,2.37,0.63,Houston vs Los Angeles (HOU),Kalshi,BUY,0.9000,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+138,2025-07-06T02:03:15.732136+00:00,same_outcome,0.0426,100.00,4.26,0.74,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8800,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+139,2025-07-06T02:03:15.732523+00:00,same_outcome,0.0426,100.00,4.26,0.74,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8800,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+140,2025-07-06T02:03:15.733800+00:00,same_outcome,0.0331,100.00,3.31,0.69,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8900,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+141,2025-07-06T02:03:15.770172+00:00,same_outcome,0.0806,299.00,24.09,2.82,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8400,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+142,2025-07-06T02:03:15.771174+00:00,same_outcome,0.0806,386.00,31.10,3.64,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8400,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+143,2025-07-06T02:03:15.892433+00:00,same_outcome,0.0800,5.00,0.40,0.05,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8400,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+144,2025-07-06T02:03:17.410736+00:00,same_outcome,0.0710,100.00,7.10,0.90,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8500,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+145,2025-07-06T02:03:17.412104+00:00,same_outcome,0.0615,100.00,6.15,0.85,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8600,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+146,2025-07-06T02:03:17.591375+00:00,same_outcome,0.0710,100.00,7.10,0.90,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8500,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+147,2025-07-06T02:03:17.710009+00:00,same_outcome,0.0800,1.00,0.08,0.01,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8400,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+148,2025-07-06T02:03:18.210127+00:00,same_outcome,0.0331,250.00,8.28,1.72,Houston vs Los Angeles (LAD),Polymarket,BUY,0.0700,Houston vs Los Angeles (LAD),Kalshi,SELL,0.1100
+149,2025-07-06T02:03:18.350109+00:00,same_outcome,0.0400,2.00,0.08,0.02,Houston vs Los Angeles (LAD),Polymarket,BUY,0.0700,Houston vs Los Angeles (LAD),Kalshi,SELL,0.1200
+150,2025-07-06T02:03:19.292274+00:00,same_outcome,0.1092,191.00,20.86,2.06,Houston vs Los Angeles (LAD),Polymarket,BUY,0.0700,Houston vs Los Angeles (LAD),Kalshi,SELL,0.1900
+151,2025-07-06T02:03:19.352859+00:00,same_outcome,0.0900,62.00,5.58,0.62,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8300,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+152,2025-07-06T02:03:19.355195+00:00,same_outcome,0.1187,62.00,7.36,0.70,Houston vs Los Angeles (LAD),Polymarket,BUY,0.0700,Houston vs Los Angeles (LAD),Kalshi,SELL,0.2000
+153,2025-07-06T02:03:19.391187+00:00,same_outcome,0.0997,201.00,20.03,2.08,Houston vs Los Angeles (LAD),Polymarket,BUY,0.0700,Houston vs Los Angeles (LAD),Kalshi,SELL,0.1800
+154,2025-07-06T02:03:19.391587+00:00,same_outcome,0.0805,100.00,8.05,0.95,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8400,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+155,2025-07-06T02:03:19.409004+00:00,same_outcome,0.0901,201.00,18.11,1.99,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8300,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+156,2025-07-06T02:03:19.430337+00:00,same_outcome,0.0901,386.00,34.78,3.82,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8300,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+157,2025-07-06T02:03:19.471080+00:00,same_outcome,0.0900,7.00,0.63,0.07,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8300,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+158,2025-07-06T02:03:19.471523+00:00,same_outcome,0.0426,100.00,4.26,0.74,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8800,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+159,2025-07-06T02:03:19.472851+00:00,same_outcome,0.0426,100.00,4.26,0.74,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8800,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+160,2025-07-06T02:03:19.473989+00:00,same_outcome,0.0520,100.00,5.20,0.80,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8700,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+161,2025-07-06T02:03:19.490776+00:00,same_outcome,0.0710,100.00,7.10,0.90,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8500,Houston vs Los Angeles (HOU),Polymarket,SELL,0.9300
+162,2025-07-06T02:03:19.550752+00:00,same_outcome,0.0680,10.00,0.68,0.12,Houston vs Los Angeles (LAD),Polymarket,BUY,0.1200,Houston vs Los Angeles (LAD),Kalshi,SELL,0.2000
+163,2025-07-06T02:03:19.551168+00:00,same_outcome,0.0197,62.00,1.22,0.62,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8300,Houston vs Los Angeles (HOU),Polymarket,SELL,0.8597
+164,2025-07-06T02:03:19.572254+00:00,same_outcome,0.0432,62.00,2.68,0.70,Houston vs Los Angeles (LAD),Polymarket,BUY,0.1455,Houston vs Los Angeles (LAD),Kalshi,SELL,0.2000
+165,2025-07-06T02:03:20.729344+00:00,same_outcome,0.0287,62.00,1.78,0.70,Houston vs Los Angeles (LAD),Polymarket,BUY,0.1600,Houston vs Los Angeles (LAD),Kalshi,SELL,0.2000
+166,2025-07-06T02:03:20.833113+00:00,same_outcome,0.0287,62.00,1.78,0.70,Houston vs Los Angeles (LAD),Polymarket,BUY,0.1600,Houston vs Los Angeles (LAD),Kalshi,SELL,0.2000
+167,2025-07-06T02:03:20.890852+00:00,same_outcome,0.0190,10.00,0.19,0.11,Houston vs Los Angeles (LAD),Polymarket,BUY,0.1600,Houston vs Los Angeles (LAD),Kalshi,SELL,0.1900
+168,2025-07-06T02:03:21.472815+00:00,same_outcome,0.0192,62.00,1.19,0.67,Houston vs Los Angeles (LAD),Polymarket,BUY,0.1600,Houston vs Los Angeles (LAD),Kalshi,SELL,0.1900
+169,2025-07-06T02:03:22.512305+00:00,same_outcome,0.0124,172.96,2.14,1.82,Houston vs Los Angeles (HOU),Kalshi,BUY,0.8164,Houston vs Los Angeles (HOU),Polymarket,SELL,0.8393
+170,2025-07-06T02:03:33.869852+00:00,same_outcome,0.0119,1595.00,19.06,14.24,Houston vs Los Angeles (LAD),Kalshi,BUY,0.1500,Houston vs Los Angeles (LAD),Polymarket,SELL,0.1709
+171,2025-07-06T02:03:36.668827+00:00,same_outcome,0.0200,4.00,0.08,0.04,Houston vs Los Angeles (LAD),Kalshi,BUY,0.1500,Houston vs Los Angeles (LAD),Polymarket,SELL,0.1800
+172,2025-07-06T02:05:54.639720+00:00,same_outcome,0.0600,1.00,0.06,0.02,Texas vs San Diego (TEX),Polymarket,BUY,0.4400,Texas vs San Diego (TEX),Kalshi,SELL,0.5200
+173,2025-07-06T02:08:03.681501+00:00,same_outcome,0.0165,257.00,4.25,3.38,Chicago vs Colorado (CWS),Polymarket,BUY,0.7200,Chicago vs Colorado (CWS),Kalshi,SELL,0.7497
+174,2025-07-06T02:08:23.777875+00:00,same_outcome,0.0078,1359.17,10.65,0.95,Houston vs Los Angeles (HOU),Polymarket,BUY,0.9815,Houston vs Los Angeles (HOU),Kalshi,SELL,0.9900
+175,2025-07-06T02:08:23.856199+00:00,same_outcome,0.0078,1359.17,10.65,0.95,Houston vs Los Angeles (LAD),Kalshi,BUY,0.0100,Houston vs Los Angeles (LAD),Polymarket,SELL,0.0185
+176,2025-07-06T02:08:25.614951+00:00,same_outcome,0.0036,1358.13,4.87,0.95,Houston vs Los Angeles (LAD),Kalshi,BUY,0.0100,Houston vs Los Angeles (LAD),Polymarket,SELL,0.0143
+177,2025-07-06T02:08:25.615685+00:00,same_outcome,0.0036,1358.13,4.87,0.95,Houston vs Los Angeles (HOU),Polymarket,BUY,0.9857,Houston vs Los Angeles (HOU),Kalshi,SELL,0.9900
+178,2025-07-06T02:09:44.351080+00:00,same_outcome,0.0007,76.00,0.06,1.10,Chicago vs Colorado (COL),Kalshi,BUY,0.2900,Chicago vs Colorado (COL),Polymarket,SELL,0.3052
+179,2025-07-06T02:09:45.769904+00:00,same_outcome,0.0095,76.00,0.72,1.08,Chicago vs Colorado (COL),Kalshi,BUY,0.2800,Chicago vs Colorado (COL),Polymarket,SELL,0.3037
+180,2025-07-06T02:09:54.908472+00:00,same_outcome,-0.0311,52.13,-1.62,0.78,Chicago vs Colorado (CWS),Polymarket,BUY,0.7084,Chicago vs Colorado (CWS),Kalshi,SELL,0.6923
+181,2025-07-06T02:09:54.968712+00:00,same_outcome,0.0077,52.13,0.40,0.72,Chicago vs Colorado (COL),Kalshi,BUY,0.2700,Chicago vs Colorado (COL),Polymarket,SELL,0.2916
+182,2025-07-06T02:09:57.498768+00:00,same_outcome,0.0269,49.43,1.33,0.65,Chicago vs Colorado (CWS),Polymarket,BUY,0.7100,Chicago vs Colorado (CWS),Kalshi,SELL,0.7500
+183,2025-07-06T02:15:35.066422+00:00,same_outcome,-0.0371,4239.98,-157.21,69.96,San Francisco vs Oakland (SF),Polymarket,BUY,0.6402,San Francisco vs Oakland (SF),Kalshi,SELL,0.6196
+184,2025-07-06T02:15:49.991615+00:00,same_outcome,0.0173,1144.84,19.85,15.03,San Francisco vs Oakland (SF),Polymarket,BUY,0.7195,San Francisco vs Oakland (SF),Kalshi,SELL,0.7500
+185,2025-07-06T02:18:00.465236+00:00,same_outcome,0.0288,1197.00,34.51,13.41,Chicago vs Colorado (COL),Polymarket,BUY,0.1599,Chicago vs Colorado (COL),Kalshi,SELL,0.2000
+186,2025-07-06T02:18:04.205865+00:00,same_outcome,0.0136,990.00,13.50,11.30,Chicago vs Colorado (CWS),Kalshi,BUY,0.7949,Chicago vs Colorado (CWS),Polymarket,SELL,0.8200
+187,2025-07-06T02:18:04.246511+00:00,same_outcome,0.0181,16.00,0.29,0.19,Chicago vs Colorado (CWS),Kalshi,BUY,0.7900,Chicago vs Colorado (CWS),Polymarket,SELL,0.8200
+188,2025-07-06T02:18:04.264027+00:00,same_outcome,0.0275,16.00,0.44,0.20,Chicago vs Colorado (CWS),Kalshi,BUY,0.7800,Chicago vs Colorado (CWS),Polymarket,SELL,0.8200
+189,2025-07-06T02:19:26.801820+00:00,same_outcome,0.0036,535.00,1.93,5.69,Chicago vs Colorado (COL),Kalshi,BUY,0.1865,Chicago vs Colorado (COL),Polymarket,SELL,0.2007
+190,2025-07-06T02:19:30.497844+00:00,same_outcome,0.0057,49.00,0.28,0.43,Chicago vs Colorado (COL),Polymarket,BUY,0.1300,Chicago vs Colorado (COL),Kalshi,SELL,0.1445
+191,2025-07-06T02:19:30.498802+00:00,same_outcome,0.0222,32.00,0.71,0.31,Chicago vs Colorado (CWS),Kalshi,BUY,0.8381,Chicago vs Colorado (CWS),Polymarket,SELL,0.8700
+192,2025-07-06T02:19:32.660249+00:00,same_outcome,0.0206,600.43,12.36,5.65,Chicago vs Colorado (COL),Polymarket,BUY,0.1300,Chicago vs Colorado (COL),Kalshi,SELL,0.1600
+193,2025-07-06T02:19:32.721578+00:00,same_outcome,0.0300,10.00,0.30,0.10,Chicago vs Colorado (CWS),Kalshi,BUY,0.8300,Chicago vs Colorado (CWS),Polymarket,SELL,0.8700
+194,2025-07-06T02:19:35.503597+00:00,same_outcome,0.0035,844.43,2.92,7.62,Chicago vs Colorado (COL),Polymarket,BUY,0.1394,Chicago vs Colorado (COL),Kalshi,SELL,0.1519
+195,2025-07-06T02:25:19.784347+00:00,same_outcome,0.0098,55.00,0.54,0.76,Chicago vs Colorado (CWS),Kalshi,BUY,0.7300,Chicago vs Colorado (CWS),Polymarket,SELL,0.7536
+196,2025-07-06T02:25:21.643346+00:00,same_outcome,0.0043,155.00,0.67,2.28,Chicago vs Colorado (COL),Polymarket,BUY,0.2810,Chicago vs Colorado (COL),Kalshi,SELL,0.3000
+197,2025-07-06T02:25:24.487073+00:00,same_outcome,0.0154,50.00,0.77,0.71,Chicago vs Colorado (CWS),Kalshi,BUY,0.7204,Chicago vs Colorado (CWS),Polymarket,SELL,0.7500
+198,2025-07-06T02:30:17.109779+00:00,same_outcome,-0.0053,986.59,-5.22,12.51,San Francisco vs Oakland (ATH),Polymarket,BUY,0.2300,San Francisco vs Oakland (ATH),Kalshi,SELL,0.2374
+199,2025-07-06T02:36:02.411880+00:00,same_outcome,0.0133,20.85,0.28,0.16,Chicago vs Colorado (CWS),Polymarket,BUY,0.8600,Chicago vs Colorado (CWS),Kalshi,SELL,0.8810
+200,2025-07-06T02:36:53.848320+00:00,same_outcome,0.0034,56.00,0.19,0.69,Texas vs San Diego (SD),Polymarket,BUY,0.2111,Texas vs San Diego (SD),Kalshi,SELL,0.2268
+201,2025-07-06T02:38:04.504505+00:00,same_outcome,-0.0064,11.00,-0.07,0.10,Chicago vs Colorado (COL),Kalshi,BUY,0.1473,Chicago vs Colorado (COL),Polymarket,SELL,0.1500
+202,2025-07-06T02:38:04.643292+00:00,same_outcome,0.0015,2608.47,3.98,16.44,Chicago vs Colorado (COL),Kalshi,BUY,0.1000,Chicago vs Colorado (COL),Polymarket,SELL,0.1078
+203,2025-07-06T02:38:04.663955+00:00,same_outcome,0.0015,2608.47,3.98,16.44,Chicago vs Colorado (CWS),Polymarket,BUY,0.8922,Chicago vs Colorado (CWS),Kalshi,SELL,0.9000
+204,2025-07-06T02:43:39.628765+00:00,same_outcome,0.0243,7.00,0.17,0.11,Pittsburgh vs Seattle (PIT),Kalshi,BUY,0.3400,Pittsburgh vs Seattle (PIT),Polymarket,SELL,0.3800
+205,2025-07-06T02:43:39.692104+00:00,same_outcome,0.0243,7.00,0.17,0.11,Pittsburgh vs Seattle (SEA),Polymarket,BUY,0.6200,Pittsburgh vs Seattle (SEA),Kalshi,SELL,0.6600
+206,2025-07-06T02:44:44.523735+00:00,same_outcome,0.0009,3232.00,3.01,14.73,Chicago vs Colorado (COL),Kalshi,BUY,0.0700,Chicago vs Colorado (COL),Polymarket,SELL,0.0755
+207,2025-07-06T02:44:44.622077+00:00,same_outcome,0.0008,3322.00,2.60,15.14,Chicago vs Colorado (CWS),Polymarket,BUY,0.9247,Chicago vs Colorado (CWS),Kalshi,SELL,0.9300
+208,2025-07-06T02:45:50.461531+00:00,same_outcome,0.0107,44.00,0.47,0.63,San Francisco vs Oakland (ATH),Polymarket,BUY,0.2600,San Francisco vs Oakland (ATH),Kalshi,SELL,0.2850
+209,2025-07-06T02:46:05.120886+00:00,same_outcome,0.0306,2147.55,65.69,20.21,San Francisco vs Oakland (ATH),Kalshi,BUY,0.1600,San Francisco vs Oakland (ATH),Polymarket,SELL,0.2000
+210,2025-07-06T02:46:05.219384+00:00,same_outcome,0.0306,2038.00,62.34,19.18,San Francisco vs Oakland (SF),Polymarket,BUY,0.8000,San Francisco vs Oakland (SF),Kalshi,SELL,0.8400
+211,2025-07-06T02:46:05.260528+00:00,same_outcome,0.0201,109.55,2.20,1.09,San Francisco vs Oakland (SF),Polymarket,BUY,0.8000,San Francisco vs Oakland (SF),Kalshi,SELL,0.8300
+212,2025-07-06T02:51:32.355079+00:00,same_outcome,0.0400,13.00,0.52,0.13,Texas vs San Diego (SD),Polymarket,BUY,0.1100,Texas vs San Diego (SD),Kalshi,SELL,0.1600
+213,2025-07-06T03:03:05.149500+00:00,same_outcome,0.0210,450.14,9.45,5.91,Chicago vs Colorado (COL),Polymarket,BUY,0.2159,Chicago vs Colorado (COL),Kalshi,SELL,0.2500
+214,2025-07-06T03:03:07.514864+00:00,same_outcome,0.0358,314.00,11.24,3.56,Chicago vs Colorado (CWS),Polymarket,BUY,0.7500,Chicago vs Colorado (CWS),Kalshi,SELL,0.7971
+215,2025-07-06T03:03:07.548923+00:00,same_outcome,0.0492,50.00,2.46,0.54,Chicago vs Colorado (CWS),Polymarket,BUY,0.7500,Chicago vs Colorado (CWS),Kalshi,SELL,0.8100
+216,2025-07-06T03:03:34.326158+00:00,same_outcome,0.0071,113.00,0.80,1.45,Chicago vs Colorado (COL),Kalshi,BUY,0.2401,Chicago vs Colorado (COL),Polymarket,SELL,0.2600
+217,2025-07-06T03:03:35.046696+00:00,same_outcome,0.0170,10.00,0.17,0.13,Chicago vs Colorado (COL),Kalshi,BUY,0.2300,Chicago vs Colorado (COL),Polymarket,SELL,0.2600
+218,2025-07-06T03:03:35.765220+00:00,same_outcome,0.0176,100.00,1.76,1.24,Chicago vs Colorado (COL),Kalshi,BUY,0.2300,Chicago vs Colorado (COL),Polymarket,SELL,0.2600
+219,2025-07-06T03:03:37.007094+00:00,same_outcome,0.0175,69.00,1.21,0.86,Chicago vs Colorado (COL),Kalshi,BUY,0.2300,Chicago vs Colorado (COL),Polymarket,SELL,0.2600
+220,2025-07-06T03:08:14.352184+00:00,same_outcome,0.0007,2343.00,1.73,23.16,Chicago vs Colorado (COL),Kalshi,BUY,0.1701,Chicago vs Colorado (COL),Polymarket,SELL,0.1807
+221,2025-07-06T03:08:14.352618+00:00,same_outcome,0.0007,2343.00,1.73,23.16,Chicago vs Colorado (CWS),Polymarket,BUY,0.8193,Chicago vs Colorado (CWS),Kalshi,SELL,0.8299
+222,2025-07-06T03:08:16.690414+00:00,same_outcome,-0.0290,164.00,-4.76,1.81,Chicago vs Colorado (COL),Kalshi,BUY,0.1959,Chicago vs Colorado (COL),Polymarket,SELL,0.1779
+223,2025-07-06T03:08:16.691311+00:00,same_outcome,-0.0254,208.00,-5.28,2.25,Chicago vs Colorado (CWS),Polymarket,BUY,0.8238,Chicago vs Colorado (CWS),Kalshi,SELL,0.8092
+224,2025-07-06T03:08:18.911731+00:00,same_outcome,-0.0337,1500.00,-50.48,16.37,Chicago vs Colorado (COL),Kalshi,BUY,0.1932,Chicago vs Colorado (COL),Polymarket,SELL,0.1705
+225,2025-07-06T03:08:19.152059+00:00,same_outcome,-0.0336,1504.00,-50.54,16.41,Chicago vs Colorado (CWS),Polymarket,BUY,0.8295,Chicago vs Colorado (CWS),Kalshi,SELL,0.8068
+226,2025-07-06T03:08:52.702488+00:00,same_outcome,0.0336,69.00,2.32,0.44,Chicago vs Colorado (CWS),Polymarket,BUY,0.8600,Chicago vs Colorado (CWS),Kalshi,SELL,0.9000
