@@ -58,9 +58,9 @@ def robust_update_kalshi_order_book(book: OrderBook, data: Dict[str, Any]):
 
 # --- Configuration ---
 LOG_LEVEL = logging.INFO
-JSONL_FILE_PATH = 'order_book_deltas_jul_5_v2.jsonl'
-MARKETS_FILE = 'markets.json'
-COMP_FILE = 'compliment.json'
+JSONL_FILE_PATH = 'jsons/order_book_deltas_jul_5_v2.jsonl'
+MARKETS_FILE = 'jsons/markets.json'
+COMP_FILE = 'jsons/compliment.json'
 PROFIT_THRESHOLD = 0.015
 ANALYSIS_MODE = 'delay' # <-- SET 'delay' FOR THE NEW MODE, 'normal' for original mode
 DEBUG_MODE = False # Recommended to be False for delay mode to avoid excessive output
@@ -69,13 +69,14 @@ TARGETED_DEBUG_CONFIG = {
     'market_name': 'Houston vs Los Angeles (LAD)',
     'timestamp_contains': '2025-07-06T02:03:11.650'
 }
-EXECUTED_TRADES_CSV = 'executed_arbitrage_trades_flipped_kalshi_v3.csv'
-DELAY_MODE_CSV = 'delay_analysis_summary.csv' # <-- New output file for delay mode
+EXECUTED_TRADES_CSV = 'tables/executed_arbitrage_trades_flipped_kalshi_v3.csv'
+DELAY_MODE_CSV = 'tables/delay_analysis_summary.csv' # <-- New output file for delay mode
 MARKET_MAPPING: Dict[str, Dict[str, str]] = {}
 TRADE_ID_COUNTER = 0
 
 # --- Setup and Helper Functions ---
 def setup_logging(): logging.basicConfig(level=LOG_LEVEL, format='%(asctime)s - %(levelname)s - %(message)s')
+
 def load_market_data():
     global MARKET_MAPPING
     with open(MARKETS_FILE) as f: MARKET_MAPPING = json.load(f)

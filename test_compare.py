@@ -17,13 +17,13 @@ from kalshi.updates import update_kalshi_order_book
 
 # --- Configuration Constants ---
 RUN_DURATION_MINUTES = None # Set to None for infinite run until Ctrl+C
-INITIAL_STATE_FILE_NAME = "initial_order_books.json" # For the full initial snapshot
-ORDER_BOOK_CHANGES_FILE_NAME = "order_book_deltas_jul_6.jsonl" # For subsequent raw updates (JSON Lines)
+INITIAL_STATE_FILE_NAME = "jsons/initial_order_books.json" # For the full initial snapshot
+ORDER_BOOK_CHANGES_FILE_NAME = "jsons/order_book_deltas_jul_6.jsonl" # For subsequent raw updates (JSON Lines)
 PRINT_INTERVAL_SECONDS = 1000000000 # Keep this high as we log changes on event now
 
 # File names for market mappings
-MARKETS_FILE = 'markets.json'
-COMP_FILE = 'compliment.json'
+MARKETS_FILE = 'jsons/markets_07_06.json'
+COMP_FILE = 'jsons/compliment_07_06.json'
 
 # --- Load Market Mappings from Files ---
 try:
@@ -400,12 +400,12 @@ async def log_order_book_update_to_deltas_json(
             logger.debug(f"NOVEL MESSAGE POLY")
     elif source_platform == "kalshi":
         if update_payload.get("price"):
-            log_entry["ks_delta"] = {"price": update_payload["price"],
-                                     "delta": update_payload["delta"],
-                                     "side": update_payload["side"]}
+            log_entry["ks_delta"] = {"price": update_payload.get("price"),
+                                     "delta": update_payload.get("delta"),
+                                     "side": update_payload.get("side")}
         elif update_payload.get("yes"):
-            log_entry["ks_delta"] = {"yes": update_payload["yes"],
-                                     "no": update_payload["no"],}
+            log_entry["ks_delta"] = {"yes": update_payload.get("yes"),
+                                     "no": update_payload.get("no"),}
         else:
             logger.debug(f"NOVEL MESSAGE KALSHI")
     elif source_platform == "system_closure":
@@ -480,7 +480,7 @@ async def process_websocket_message(source: str, message: Dict[str, Any], polyma
             logger.error(f"OrderBook instance not found for Kalshi market_id: {market_id}.")
             return
     
-    elif source == "update" and False: # This source is specifically for Kalshi market status updates
+    elif source == "update": # This source is specifically for Kalshi market status updates
         msg_content = message.get("msg", {})
         market_id = msg_content.get("market_ticker")
         
