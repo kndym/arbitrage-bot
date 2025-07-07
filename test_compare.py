@@ -18,7 +18,7 @@ from kalshi.updates import update_kalshi_order_book
 # --- Configuration Constants ---
 RUN_DURATION_MINUTES = None # Set to None for infinite run until Ctrl+C
 INITIAL_STATE_FILE_NAME = "initial_order_books.json" # For the full initial snapshot
-ORDER_BOOK_CHANGES_FILE_NAME = "order_book_deltas_jul_5_v2.jsonl" # For subsequent raw updates (JSON Lines)
+ORDER_BOOK_CHANGES_FILE_NAME = "order_book_deltas_jul_6.jsonl" # For subsequent raw updates (JSON Lines)
 PRINT_INTERVAL_SECONDS = 1000000000 # Keep this high as we log changes on event now
 
 # File names for market mappings
