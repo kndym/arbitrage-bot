@@ -8,10 +8,11 @@ import pprint as pp
 for x in range(3):
     r=requests.get(f"https://gamma-api.polymarket.com/events?tag_id=100639&related_tags=true&closed=false&limit=1000&offset={500*x}")
     response=r.json()
-
+    a=0
     for event in response:
         if any( x in event["slug"] for x in ["mlb"]):
-            print(event["slug"])
-            print(event["markets"][0]["outcomes"])
-            print(event["markets"][0]["clobTokenIds"])
+            a+=1
+            pp.pprint(event)
+            if a>0:
+                break
  

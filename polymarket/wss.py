@@ -58,6 +58,25 @@ class PolymarketWSS:
         else:
             logging.warning("Polymarket WebSocket not connected or closed. Cannot send subscription message.")
 
+    async def _subscribe_to_user_data(self):
+        """Sends the subscription message for market data using current asset_ids."""
+        if self.websocket:
+            if not self.asset_ids:
+                logging.info("No Polymarket assets to subscribe to. Skipping subscription.")
+                return
+
+            subscribe_message = {
+                "type": "MARKET",
+                "assets_ids": self.asset_ids
+            }
+            try:
+                await self.websocket.send(json.dumps(subscribe_message))
+                logging.info(f"Sent subscription request for MARKET channel with asset IDs: {self.asset_ids}")
+            except Exception as e:
+                logging.error(f"Error sending subscription message to Polymarket: {e}")
+        else:
+            logging.warning("Polymarket WebSocket not connected or closed. Cannot send subscription message.")
+
     async def listen(self):
         """Listens for messages from the Polymarket WebSocket."""
         if not self.websocket:

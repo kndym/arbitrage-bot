@@ -84,6 +84,7 @@ def get_headers():
 
 def find_markets(title_string):
     cursor=""
+    a=0
     for x in range(100):
         headers = {"accept": "application/json",
                     }
@@ -96,11 +97,14 @@ def find_markets(title_string):
         cursor=response["cursor"]
         #pprint.pp(response["events"][0])
         for event in response["events"]:
-            if "MLB" in event["event_ticker"]:
-                for market in event["markets"]:
-                    pass
-                    pprint.pp(market["ticker"])
+            if title_string in event["event_ticker"]:
+                pprint.pp(event)
+                a+=1
+            if a>0:
+                break
+        if a>0:
+                break
         if cursor=="":
             break
 
-find_markets("Tampa Bay vs Minnesota")
+find_markets("KXMLBGAME")
