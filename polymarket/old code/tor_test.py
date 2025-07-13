@@ -1,10 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Nov 23 22:15:33 2021
 
-@author: Yicong
-"""
-import io
 import os
 import stem.process
 import re
