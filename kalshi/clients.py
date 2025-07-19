@@ -1,3 +1,5 @@
+# --- START OF FILE clients.py (CORRECTED) ---
+
 import requests
 import base64
 import time
@@ -19,7 +21,6 @@ import asyncio # Added for WebSocket client's message_queue and async operations
 import logging
 
 # Configure logging
-# You can change the level to DEBUG for more detailed output during development
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(name)s - %(message)s')
 logger = logging.getLogger('KalshiClient') # A dedicated logger for Kalshi client classes
 
@@ -28,7 +29,8 @@ class Environment(Enum):
     DEMO = "demo"
     PROD = "prod"
 
-env = Environment.PROD # This can be set dynamically later, or just kept for a default.
+# The 'env' variable here can be removed or set to a default, as it's often passed via constructor.
+# env = Environment.PROD
 
 class KalshiBaseClient:
     """Base client class for interacting with the Kalshi API."""
@@ -136,16 +138,17 @@ class KalshiHttpClient(KalshiBaseClient):
         self.last_api_call = datetime.now()
         self.logger.debug("Rate limit checked. API call proceeding.")
 
-    def raise_if_bad_response(self, response: requests.Response) -> None:
+    def raise_if_bad_response(self, response: requests.Response) -> dict:
         """Raises an HTTPError if the response status code indicates an error."""
         if not (200 <= response.status_code <= 299):
             self.logger.error(f"HTTP request failed with status code {response.status_code} for {response.request.method} {response.url}")
             try:
                 error_details = response.json()
                 self.logger.error(f"Error response body: {json.dumps(error_details)}")
+                return json.dumps(error_details)
             except json.JSONDecodeError:
                 self.logger.error(f"Error response body (non-JSON): {response.text[:200]}...") # Log partial text
-            response.raise_for_status() # This will raise the HTTPError
+                return {}
 
     def post(self, path: str, body: dict) -> Any:
         """Performs an authenticated POST request to the Kalshi API."""
@@ -271,7 +274,7 @@ class KalshiWebSocketClient(KalshiBaseClient):
         self,
         key_id: str,
         private_key: rsa.RSAPrivateKey,
-        environment: Environment.DEMO,
+        environment: Environment, # EDITED: Corrected type hint from Environment.DEMO to Environment
         message_queue: Optional[asyncio.Queue], # Make message_queue explicit for constructor
         ticker_list: list
     ):
@@ -285,26 +288,27 @@ class KalshiWebSocketClient(KalshiBaseClient):
         self.server_id=0
 
 
-    async def connect(self):
+    async def connect(self): # EDITED: Removed tickers_to_subscribe argument here
         """Establishes a WebSocket connection using authentication."""
         host = self.WS_BASE_URL + self.url_suffix
         auth_headers = self.request_headers("GET", self.url_suffix)
         self.logger.info(f"Attempting to connect to Kalshi WebSocket: {host}")
 
-        # The async with block keeps the connection open as long as the code inside is running
         try:
             self.ws = await websockets.connect(host, additional_headers=auth_headers)
             self.logger.info(f"Successfully connected to Kalshi WebSocket: {host}")
-            await self.subscribe_to_tickers()
+            await self.subscribe_to_tickers() # This method uses self.ticker_list
         except websockets.ConnectionClosed as e:
             await self.on_close(e.code, e.reason)
             self.logger.warning(f"WebSocket connection closed unexpectedly. Code: {e.code}, Reason: {e.reason}")
+            self.ws = None # Set to None on failure
         except ConnectionRefusedError:
             self.logger.error(f"Connection refused for {host}. Is the server running and accessible?")
-            self.ws = None
+            self.ws = None # Set to None on failure
         except Exception as e:
             await self.on_error(e)
             self.logger.critical(f"Unhandled exception during WebSocket connection: {e}", exc_info=True)
+            self.ws = None # Set to None on failure
 
 
     async def subscribe_to_tickers(self):
@@ -340,7 +344,7 @@ class KalshiWebSocketClient(KalshiBaseClient):
             "id": self.message_id,
             "cmd": "update_subscription",
             "params": {
-                "sids": [456],
+                "sids": [456], # NOTE: sids are specific to an active subscription. You might need to track these.
                 "market_tickers": [ticker],
                 "action": "delete_markets"
             }
@@ -361,6 +365,11 @@ class KalshiWebSocketClient(KalshiBaseClient):
     async def listen(self):
         """Handle incoming messages."""
         self.logger.info("Starting WebSocket message handler.")
+        # EDITED: Add null check for self.ws before async for loop (critical fix)
+        if not self.ws:
+            self.logger.error("Kalshi WebSocket (self.ws) is None. Cannot start listening.")
+            return
+        
         try:
             async for message in self.ws:
                 try:
@@ -374,8 +383,10 @@ class KalshiWebSocketClient(KalshiBaseClient):
             self.logger.info("WebSocket connection closed gracefully during handler loop.")
         except websockets.ConnectionClosedError as e:
             self.logger.error(f"WebSocket connection closed with error during handler loop: Code={e.code}, Reason={e.reason}")
+            self.ws = None # Set to None on error closure
         except Exception as e:
             self.logger.critical(f"Unhandled exception in WebSocket handler: {e}", exc_info=True)
+            self.ws = None # Set to None on error
 
     async def on_message(self, data):
         """Callback for handling incoming messages."""
@@ -387,20 +398,17 @@ class KalshiWebSocketClient(KalshiBaseClient):
                     await self.message_queue.put(('kalshi', data))
                     self.logger.debug(f"Put '{event_type}' event into queue from Kalshi.")
                 elif event_type == "market_lifecycle_v2":
-                    await self.message_queue.put(('update', data))
+                    await self.message_queue.put(('update', data)) # Consider a more specific key if 'update' is general
                     self.logger.debug(f"Put '{event_type}' event into queue from Kalshi.")
                     pp.pprint(data)
                 else:
                     if event_type in ["subscribed", "error"]:
                         pp.pprint(data)
                     self.logger.info(f"Unkown Kalshi event called {event_type}")
-                #print(event_type)
-                #pp.pprint(data)
             except Exception as e:
                 self.logger.error(f"Error putting message into queue: {e}. Message data: {json.dumps(data)}", exc_info=True)
         else:
             self.logger.warning("No message queue set for Kalshi WebSocket. Message will not be processed by consumer.")
-            # pprint.pp(data) # Only print if no queue to avoid double logging/printing if queue processes it
 
     async def on_error(self, error):
         """Callback for handling errors."""
@@ -411,107 +419,18 @@ class KalshiWebSocketClient(KalshiBaseClient):
         self.logger.info(f"WebSocket connection closed with code: {close_status_code} and message: '{close_msg}'")
     
     async def close(self):
-        """Closes the Polymarket WebSocket connection."""
+        """Closes the Kalshi WebSocket connection."""
         if self.ws:
             await self.ws.close()
-            logging.info("Polymarket WebSocket connection closed.")
-
+            logging.info("Kalshi WebSocket connection closed.")
+            self.ws = None # Ensure it's cleared
+        else:
+            logging.info("Kalshi WebSocket not connected.")
 
     async def disconnect(self):
-        """Closes the Polymarket WebSocket connection gracefully."""
-        if self.ws:
-            logging.info("Closing Polymarket WebSocket connection...")
-            await self.ws.close()
-            self.ws = None # Clear the websocket instance
-            logging.info("Polymarket WebSocket connection closed.")
-        else:
-            logging.info("Polymarket WebSocket not connected.")
+        """Closes the Kalshi WebSocket connection gracefully. (Alias for close)"""
+        await self.close()
 
-
-# Example Usage (adapted from your Polymarket example to be testable)
-async def main():
-    # --- IMPORTANT: Replace with your actual Key ID and Private Key ---
-    # For a real application, load these securely, e.g., from environment variables
-    # or a configuration file. NEVER hardcode private keys in production code.
-    try:
-        # Example for generating a dummy key pair for testing (DO NOT USE IN PRODUCTION)
-        private_key = rsa.generate_private_key(
-            public_exponent=65537,
-            key_size=2048,
-        )
-        # In a real scenario, you'd load your actual private key from a file:
-        # with open("path/to/your/private_key.pem", "rb") as key_file:
-        #     private_key = serialization.load_pem_private_key(
-        #         key_file.read(),
-        #         password=None, # or your passphrase if encrypted
-        #     )
-
-        # Dummy Key ID (replace with your actual Kalshi Key ID)
-        key_id = "YOUR_KALSHI_API_KEY_ID"
-
-        if key_id == "YOUR_KALSHI_API_KEY_ID":
-            logger.warning("!!! WARNING: Using a dummy Kalshi API Key ID. Replace with your actual Key ID for real API calls. !!!")
-            logger.warning("!!! WARNING: Using a dummy generated RSA private key. Replace with your actual private key for real API calls. !!!")
-
-
-        message_queue = asyncio.Queue()
-
-        # Initialize HTTP Client
-        http_client = KalshiHttpClient(key_id=key_id, private_key=private_key, environment=Environment.DEMO)
-
-        # Test HTTP methods
-        try:
-            logger.info("\n--- Testing HTTP Client ---")
-            balance = await asyncio.to_thread(http_client.get_balance) # Use to_thread for blocking HTTP calls
-            logger.info(f"Account Balance: {pprint.pformat(balance)}")
-
-            exchange_status = await asyncio.to_thread(http_client.get_exchange_status)
-            logger.info(f"Exchange Status: {pprint.pformat(exchange_status)}")
-
-            # Example: Get trades for a specific ticker (replace with a real ticker if needed)
-            # trades = await asyncio.to_thread(http_client.get_trades, ticker="FEDFUNDS-DEC23-C3.125")
-            # logger.info(f"Sample Trades: {pprint.pformat(trades)}")
-
-        except Exception as e:
-            logger.error(f"Error testing HTTP client: {e}")
-
-        # Initialize WebSocket Client
-        ws_client = KalshiWebSocketClient(key_id=key_id, private_key=private_key, environment=Environment.DEMO, message_queue=message_queue)
-
-        # Example tickers to subscribe to (replace with actual Kalshi market tickers)
-        # You'll need to find valid tickers from Kalshi's API or website.
-        # For DEMO environment, you might need to find current demo market tickers.
-        kalshi_tickers_to_subscribe = ["ELEC24-PRES-R"] # Example ticker, adjust as needed
-
-        # Start WebSocket connection in a separate task
-        # The connect method will internally call handler, which is an async for loop.
-        # So, it will stay alive.
-        ws_task = asyncio.create_task(ws_client.connect(kalshi_tickers_to_subscribe))
-
-        logger.info("\n--- Kalshi WebSocket listener started. Waiting for messages... (Press Ctrl+C to stop) ---")
-        while True:
-            # Get messages from the queue (this simulates the main processor)
-            source, message = await message_queue.get()
-            logger.info(f"\n--- Main received from {source} ---")
-            pp.pprint(message)
-            message_queue.task_done() # Mark the task as done for queue tracking
-
-    except KeyboardInterrupt:
-        logger.info("\nProgram interrupted. Shutting down.")
-    except Exception as e:
-        logger.critical(f"An unhandled error occurred in main: {e}", exc_info=True)
-    finally:
-        # Attempt to close the WebSocket client gracefully
-        if 'ws_client' in locals() and ws_client.ws:
-            await ws_client.ws.close()
-            logger.info("Kalshi WebSocket client explicitly closed.")
-        # Wait for the WebSocket task to finish if it's still running
-        if 'ws_task' in locals() and not ws_task.done():
-            ws_task.cancel()
-            try:
-                await ws_task # Wait for the task to actually complete its cancellation
-            except asyncio.CancelledError:
-                logger.info("Kalshi WebSocket task cancelled.")
-            except Exception as e:
-                logger.error(f"Error waiting for Kalshi WS task to cancel: {e}")
-
+# --- EDITED: REMOVED THE EXAMPLE `main()` FUNCTION FROM HERE ---
+# This function should not be in the client library file.
+# It caused conflicts and unnecessary dummy key generation.

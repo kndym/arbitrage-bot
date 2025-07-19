@@ -72,4 +72,5 @@ def update_polymarket_order_book(order_book: OrderBook, data: Dict[str, Any]):
                 continue
         # print(f"Polymarket: Price change updated for {order_book.market_id}")
     else:
-        print(f"Warning: Unhandled Polymarket event type: {event_type}.")
+        pass
+        #print(f"Warning: Unhandled Polymarket event type: {event_type}.")

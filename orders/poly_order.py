@@ -50,19 +50,24 @@ def buy_polymarket_contract():
         polymarket_proxy_address = os.getenv("POLYMARKET_PROXY_ADDRESS")
         chain_id = 137
 
+        print()
+
         client = ClobClient(host, key=key, chain_id=chain_id, signature_type=1, funder=polymarket_proxy_address)
+
+        api_creds = client.create_or_derive_api_creds()
+
         creds = ApiCreds(
-            api_key=os.getenv("CLOB_API_KEY"),
-            api_secret=os.getenv("CLOB_SECRET"),
-            api_passphrase=os.getenv("CLOB_PASS_PHRASE"),
+            api_key= api_creds.api_key,
+            api_secret= api_creds.api_secret,
+            api_passphrase=api_creds.api_passphrase
         )
         client.set_api_creds(creds)
 
         order_args = OrderArgs(
             side=BUY,
-            token_id="17793181274537832236554079944355295589343285861808056506317793204247664921006",
-            size=1.0,
-            price=0.47
+            token_id="46297652964732942429361618986173309033380478718690816373978700926567889244304",
+            size=2.0,
+            price=0.75
         )
 
         print("[INFO] Creating signed order for Polymarket...")

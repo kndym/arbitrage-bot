@@ -1,7 +1,7 @@
 import json
 
-MARKETS_FILE='markets.json'
-COMP_FILE='compliment.json'
+MARKETS_FILE='jsons\markets_07_13.json'
+COMP_FILE='jsons\compliment_07_13.json'
 
 RUN_DURATION_MINUTES = 5
 OUTPUT_FILE_NAME = "order_book_snapshot.txt"

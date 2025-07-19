@@ -158,7 +158,7 @@ def create_market_files():
     """
     # Set the target date for which to generate the files.
     # Using a fixed date for this example based on the prompt's data.
-    target_date = datetime.date(2025, 7, 12)
+    target_date = datetime.date(2025, 7, 13)
     
     # Fetch data from both platforms.
     polymarket_data = fetch_polymarket_data(target_date)

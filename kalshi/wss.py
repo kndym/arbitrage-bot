@@ -28,17 +28,6 @@ except FileNotFoundError:
 except Exception as e:
     raise Exception(f"Error loading private key: {str(e)}")
 
-try:
-    with open(KEYFILE, "rb") as key_file:
-        private_key = serialization.load_pem_private_key(
-            key_file.read(),
-            password=None  # Provide the password if your key is encrypted
-        )
-except FileNotFoundError:
-    raise FileNotFoundError(f"Private key file not found at {KEYFILE}")
-except Exception as e:
-    raise Exception(f"Error loading private key: {str(e)}")
-
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 

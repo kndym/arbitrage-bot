@@ -38,7 +38,7 @@ def main():
 
     # --- KALSHI (Direct Connection) ---
     # With proxy variables unset, this function will use the default network
-    buy_kalshi_contract()
+    #buy_kalshi_contract()
 
     # --- Shutdown ---
     stop_tor(tor_process)

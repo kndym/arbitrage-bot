@@ -6,8 +6,7 @@ import time
 from datetime import datetime, timezone
 import json
 # Import your classes and functions
-from polymarket.wss import PolymarketWSS, POLYMARKET_MARKET_WSS_URI
-from kalshi.wss import KalshiWSS, env, KEYID, private_key
+
 from order_book import OrderBook
 from polymarket.updates import update_polymarket_order_book
 from kalshi.updates import update_kalshi_order_book

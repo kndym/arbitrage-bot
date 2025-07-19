@@ -4,7 +4,7 @@ import stem.process
 import re
 import urllib.request
 
-def start_tor():
+def start_tor(depth=0):
     """
     Starts the Tor process with a specific configuration and returns the process
     and proxy details.
@@ -27,22 +27,25 @@ def start_tor():
     print("[INFO] Starting Tor process...")
     try:
         tor_process = stem.process.launch_tor_with_config(
-            config={
+             config={
                 'SocksPort': str(SOCKS_PORT),
                 'ControlPort': str(CONTROL_PORT),
-                'EntryNodes': '{US}',
-                'ExitNodes': '{BR}',
-                'StrictNodes': '1',
-                'CookieAuthentication': '1',
-                'MaxCircuitDirtiness': '60000',
+                'ExcludeExitNodes ': '{US},{GB},{FR},{CA},{SG},{PL},{TH},{BE},{TW}',
                 'GeoIPFile': GEOIPFILE_PATH,
+                'NewCircuitPeriod': '300',
+                'MaxCircuitDirtiness': '300',
+                'StrictNodes': '1'
             },
             init_msg_handler=lambda line: print(f"[TOR] {line}") if re.search('Bootstrapped', line) else False,
             tor_cmd=TOR_PATH
         )
         print("[SUCCESS] Tor process started and bootstrapped.")
     except OSError:
-        return start_tor()
+        if depth>10:
+            print("FAILED TO CONNECT TO TOR")
+            return None, None
+        else:
+            return start_tor()
     except Exception as e:
         print(f"[ERROR] Failed to start Tor process: {e}")
         return None, None
