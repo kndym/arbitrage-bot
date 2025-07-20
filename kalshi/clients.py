@@ -295,7 +295,7 @@ class KalshiWebSocketClient(KalshiBaseClient):
         self.logger.info(f"Attempting to connect to Kalshi WebSocket: {host}")
 
         try:
-            self.ws = await websockets.connect(host, additional_headers=auth_headers)
+            self.ws = await websockets.connect(host, additional_headers=auth_headers, proxy=None)
             self.logger.info(f"Successfully connected to Kalshi WebSocket: {host}")
             await self.subscribe_to_tickers() # This method uses self.ticker_list
         except websockets.ConnectionClosed as e:
@@ -320,7 +320,7 @@ class KalshiWebSocketClient(KalshiBaseClient):
             "id": self.message_id,
             "cmd": "subscribe",
             "params": {
-                "channels": ["orderbook_delta", "market_lifecycle_v2"], # Ensure this is correct for your desired data
+                "channels": ["orderbook_delta"], # Ensure this is correct for your desired data
             }
         }
         if len(self.ticker_list)!=1:

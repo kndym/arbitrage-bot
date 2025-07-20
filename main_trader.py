@@ -6,6 +6,8 @@ import os
 import time
 from typing import Dict, Any, Optional, Tuple
 from dotenv import load_dotenv
+import sys
+import math
 
 # Import clients and logic
 from kalshi.clients import Environment, KalshiHttpClient
@@ -13,29 +15,44 @@ from py_clob_client.client import ClobClient, ApiCreds
 from cryptography.hazmat.primitives import serialization
 
 # Import the new WSS classes
-from polymarket.wss import PolymarketWSS, POLYMARKET_MARKET_WSS_URI
+from polymarket.wss import PolymarketWSS, POLYMARKET_WSS_URI
 from kalshi.wss import KalshiWSS
 
 from order_book import OrderBook
 from polymarket.updates import update_polymarket_order_book
 from kalshi.updates import update_kalshi_order_book
-from orders.tor_manager import start_tor, stop_tor
-from config import MARKET_MAPPING
+from orders.tor_manager import start_tor, stop_tor, ping_tor
+from config import MARKET_MAPPING, COMPLEMENTARY_MARKET_PAIRS, PROD_KEYID, PROD_KEYFILE, POLYMARKET_PROXY_ADDRESS, WALLET_PRIVATE_KEY, AUTH
 from fees import calculate_kalshi_fee, POLYMARKET_FEE_PERCENT
 from trader import execute_complimentary_buy_trade # This function needs to be implemented in trader.py
 
 # --- Trader Configuration ---
 MIN_NET_PROFIT_PER_SHARE = 0.01
 MAX_TRADE_SIZE = 5
-TRADE_COOLDOWN_SECONDS = 60
+TRADE_COOLDOWN_SECONDS = 10
 
 # --- Global Variables ---
 ALL_ORDER_BOOKS: Dict[str, OrderBook] = {}
 REVERSE_MARKET_LOOKUP: Dict[str, str] = {}
-LAST_TRADE_ATTEMPT: Dict[str, float] = {}
+REVERSE_COMPLEMENTARY_PAIRS: Dict[str, str] = {}
+LAST_GAME_TRADE_ATTEMPT: Dict[Tuple[str, str], float] = {}
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+import logging
+import sys
+
+# Get a logger instance (you can also use logging.getLogger(__name__) for specific modules)
+logger = logging.getLogger(__name__) 
+
+file_log_handler = logging.FileHandler('7_19_v3.log')
+logger.addHandler(file_log_handler)
+
+stderr_log_handler = logging.StreamHandler()
+logger.addHandler(stderr_log_handler)
+
+# nice output format
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+file_log_handler.setFormatter(formatter)
+stderr_log_handler.setFormatter(formatter)
 
 load_dotenv()
 polymarket_client: Optional[ClobClient] = None
@@ -52,7 +69,10 @@ async def initialize_market_data():
             kalshi_id = market_ids["kalshi"]
             ALL_ORDER_BOOKS[kalshi_id] = OrderBook(kalshi_id)
             REVERSE_MARKET_LOOKUP[kalshi_id] = canonical_name
-        LAST_TRADE_ATTEMPT[canonical_name] = 0
+
+    # Create a reverse mapping for complementary pairs for easy lookup
+    for key, value in COMPLEMENTARY_MARKET_PAIRS.items():
+        REVERSE_COMPLEMENTARY_PAIRS[value] = key
 
 def get_paired_books(canonical_name: str) -> Tuple[Optional[OrderBook], Optional[OrderBook]]:
     market_ids = MARKET_MAPPING.get(canonical_name, {})
@@ -60,17 +80,48 @@ def get_paired_books(canonical_name: str) -> Tuple[Optional[OrderBook], Optional
     kalshi_book = ALL_ORDER_BOOKS.get(market_ids.get("kalshi"))
     return poly_book, kalshi_book
 
-def check_complimentary_arbitrage(book1: OrderBook, platform1: str, book2: OrderBook, platform2: str, canonical_name: str):
+def check_and_execute_arbitrage_pair(
+    book1: OrderBook, platform1: str,
+    book2: OrderBook, platform2: str,
+    game_key: Tuple[str, str]
+):
     """
-    Checks for arbitrage opportunities by buying complimentary outcomes across two platforms.
-    For example, buying 'Yes' on Platform 1 and 'No' on Platform 2 for the same event.
+    Checks for a specific arbitrage opportunity between two complementary books and executes if profitable.
+    This function assumes buying 'Yes' on both outcomes.
     """
-    if not all([book1.lowest_ask, book2.lowest_ask]):
+    if not all([book1, book2, book1.lowest_ask, book2.lowest_ask]):
         return False # Not enough data to compare
 
     buy_price_1 = book1.lowest_ask
     buy_price_2 = book2.lowest_ask
-    trade_size = MAX_TRADE_SIZE
+
+    sell_price_1 = book1.highest_bid
+    sell_price_2 = book2.highest_bid
+
+    # Get available liquidity at the best ask price for each book
+    liquidity1 = book1.get_liquidity_at_price(buy_price_1, 'ask')
+    liquidity2 = book2.get_liquidity_at_price(buy_price_2, 'ask')
+
+    # Determine the maximum possible trade size based on available liquidity
+    available_liquidity = min(liquidity1, liquidity2)
+    
+    if available_liquidity <= 0:
+        return False
+
+    # Determine the actual trade size, capped by the global max size
+    trade_size = min(MAX_TRADE_SIZE, available_liquidity)
+
+    # We can't trade fractional contracts, so we must have at least 1
+    if trade_size < 1:
+        return False
+    
+    if platform1 == "Polymarket":
+        min_liquidity=math.ceil(1/buy_price_1)
+    else:
+        min_liquidity=math.ceil(1/buy_price_2)
+    
+    if trade_size<min_liquidity:
+        return False
 
     # Calculate fees for both platforms
     fee1 = buy_price_1 * trade_size * POLYMARKET_FEE_PERCENT if platform1 == "Polymarket" else calculate_kalshi_fee(trade_size, buy_price_1)
@@ -78,47 +129,64 @@ def check_complimentary_arbitrage(book1: OrderBook, platform1: str, book2: Order
 
     total_cost = (buy_price_1 * trade_size) + (buy_price_2 * trade_size) + fee1 + fee2
 
-    # An arbitrage opportunity exists if the total cost to buy both complimentary outcomes is less than the settlement value ($1 * trade_size)
+    # Arbitrage exists if total cost to secure a guaranteed $1 payout (per share) is less than the payout
     if total_cost < trade_size:
         net_profit = trade_size - total_cost
         if net_profit / trade_size >= MIN_NET_PROFIT_PER_SHARE:
-            LAST_TRADE_ATTEMPT[canonical_name] = time.time()
-            logger.info(f"Complimentary Arbitrage opportunity found for {canonical_name}!")
-            logger.info(f"  - Buy {trade_size} on {platform1} (Market ID: {book1.market_id}) at {buy_price_1}")
-            logger.info(f"  - Buy {trade_size} on {platform2} (Market ID: {book2.market_id}) at {buy_price_2}")
-            logger.info(f"  - Total Cost (including fees): {total_cost:.4f}")
-            logger.info(f"  - Expected Profit: {net_profit:.4f}")
+            LAST_GAME_TRADE_ATTEMPT[game_key] = time.time()
+            canonical_name_1 = REVERSE_MARKET_LOOKUP.get(book1.market_id, "Unknown")
+            canonical_name_2 = REVERSE_MARKET_LOOKUP.get(book2.market_id, "Unknown")
 
-            # Execute the trades - this function needs to be implemented in trader.py
+            logger.info(f"Complimentary Arbitrage opportunity found for game: {' vs '.join(game_key)}")
+            logger.info(f"  - Determined Trade Size: {trade_size} (Available: {available_liquidity:.2f}, Max Cap: {MAX_TRADE_SIZE})")
+            logger.info(f"  - Buy YES on '{canonical_name_1}' on {platform1} at {buy_price_1} (Liquidity: {liquidity1:.2f})")
+            logger.info(f"  - Buy YES on '{canonical_name_2}' on {platform2} at {buy_price_2} (Liquidity: {liquidity2:.2f})")
+            logger.info(f"  - Total Cost for {trade_size} shares (incl. fees): {total_cost:.4f}")
+            logger.info(f"  - Expected Net Profit: {net_profit:.4f}")
+
+            # Execute the trades
             asyncio.create_task(execute_complimentary_buy_trade(
-                poly_client=polymarket_client, kalshi_client=kalshi_client,
-                canonical_name=canonical_name,
-                book1_platform=platform1, book1_market_id=book1.market_id, book1_price=buy_price_1,
-                book2_platform=platform2, book2_market_id=book2.market_id, book2_price=buy_price_2,
+                poly_client=polymarket_client, kalshi_client=kalshi_client, canonical_name_1=canonical_name_1, canonical_name_2=canonical_name_2,
+                book1_platform=platform1, book1_market_id=book1.market_id, book1_ask=buy_price_1, book1_bid=sell_price_1,
+                book2_platform=platform2, book2_market_id=book2.market_id, book2_ask=buy_price_2, book2_bid=sell_price_2,
                 trade_size=trade_size, proxies=PROXIES
             ))
             return True # Indicate that an arbitrage opportunity was found and acted upon
     return False # No arbitrage opportunity found
 
-def check_for_arbitrage_and_trade(canonical_name: str):
-    """Compares prices and triggers trades if profitable opportunities exist for complimentary markets."""
-    poly_book, kalshi_book = get_paired_books(canonical_name)
-    if not all([poly_book, kalshi_book]):
-        return # Not enough data to compare
+def check_game_arbitrage(canonical_name_updated: str):
+    """
+    NEW FUNCTION: Checks for arbitrage opportunities across a pair of complementary markets.
+    e.g., ("Team A wins" vs "Team B wins")
+    """
+    # Find the complementary market pair for the updated market
+    market_a_name = canonical_name_updated
+    market_b_name = COMPLEMENTARY_MARKET_PAIRS.get(market_a_name) or REVERSE_COMPLEMENTARY_PAIRS.get(market_a_name)
 
-    # Cooldown Check
-    if time.time() - LAST_TRADE_ATTEMPT.get(canonical_name, 0) < TRADE_COOLDOWN_SECONDS:
+    if not market_b_name:
+        # logger.warning(f"No complementary market found for {market_a_name}. Cannot check for arbitrage.")
         return
 
-    # Scenario 1: Buy on Polymarket and Kalshi assuming poly_book is 'Yes' and kalshi_book is 'No'
-    # The actual 'yes'/'no' designation depends on your MARKET_MAPPING and how the order books are populated.
-    if check_complimentary_arbitrage(poly_book, "Polymarket", kalshi_book, "Kalshi", canonical_name):
+    # Create a unique, order-independent key for the game to manage cooldowns
+    game_key = tuple(sorted((market_a_name, market_b_name)))
+
+    # Cooldown Check for this specific game
+    if time.time() - LAST_GAME_TRADE_ATTEMPT.get(game_key, 0) < TRADE_COOLDOWN_SECONDS:
         return
 
-    # Scenario 2: Buy on Kalshi and Polymarket assuming kalshi_book is 'Yes' and poly_book is 'No'
-    if check_complimentary_arbitrage(kalshi_book, "Kalshi", poly_book, "Polymarket", canonical_name):
-        return
+    # Get order books for both sides of the game
+    # market_a represents one outcome (e.g., TOR wins)
+    # market_b represents the complementary outcome (e.g., SF wins)
+    poly_book_a, kalshi_book_a = get_paired_books(market_a_name)
+    poly_book_b, kalshi_book_b = get_paired_books(market_b_name)
 
+    # Scenario 1: Buy Team A on Polymarket, Buy Team B on Kalshi
+    if check_and_execute_arbitrage_pair(poly_book_a, "Polymarket", kalshi_book_b, "Kalshi", game_key):
+        return # Trade found, exit to respect cooldown
+
+    # Scenario 2: Buy Team A on Kalshi, Buy Team B on Polymarket
+    if check_and_execute_arbitrage_pair(kalshi_book_a, "Kalshi", poly_book_b, "Polymarket", game_key):
+        return # Trade found, exit
 
 async def process_websocket_message(source: str, message: Dict[str, Any]):
     """Processes a message, updates the relevant order book, and checks for arbitrage."""
@@ -134,7 +202,9 @@ async def process_websocket_message(source: str, message: Dict[str, Any]):
     
     if market_id and market_id in REVERSE_MARKET_LOOKUP:
         canonical_name = REVERSE_MARKET_LOOKUP[market_id]
-        check_for_arbitrage_and_trade(canonical_name)
+        # **MODIFIED CALL** to the new arbitrage checking function
+        check_game_arbitrage(canonical_name)
+
 
 async def process_messages_from_queue(queue: asyncio.Queue):
     """Continuously fetches messages from the queue and processes them."""
@@ -154,6 +224,7 @@ async def run_trader():
     if not tor_process:
         logger.error("Failed to start Tor. Exiting.")
         return
+    ping_tor(PROXIES)
 
     try:
         logger.info("Temporarily setting proxy environment variables for ClobClient initialization...")
@@ -162,21 +233,21 @@ async def run_trader():
 
         poly_client = ClobClient(
             host="https://clob.polymarket.com",
-            key=os.getenv("WALLET_PRIVATE_KEY"),
+            key=WALLET_PRIVATE_KEY,
             chain_id=137,
             signature_type=1,
-            funder=os.getenv("POLYMARKET_PROXY_ADDRESS")
+            funder=POLYMARKET_PROXY_ADDRESS
         )
 
         api_creds = poly_client.create_or_derive_api_creds()
 
-        creds = ApiCreds(
-            api_key= api_creds.api_key,
-            api_secret= api_creds.api_secret,
-            api_passphrase=api_creds.api_passphrase
-        )
+        AUTH = {
+            'apiKey': api_creds.api_key,
+            'secret': api_creds.api_secret,
+            'passphrase': api_creds.api_passphrase
+        }
 
-        poly_client.set_api_creds(creds)
+        poly_client.set_api_creds(api_creds)
         polymarket_client = poly_client
         logger.info("Polymarket ClobClient initialized successfully (routed via Tor).")
 
@@ -188,12 +259,12 @@ async def run_trader():
             del os.environ['HTTPS_PROXY']
 
     try:
-        key_file_path = os.getenv('PROD_KEYFILE')
+        key_file_path =PROD_KEYFILE
         with open(key_file_path, "rb") as f:
             private_key = serialization.load_pem_private_key(f.read(), password=None)
         
         kalshi_client = KalshiHttpClient(
-            key_id=os.getenv('PROD_KEYID'),
+            key_id=PROD_KEYID,
             private_key=private_key,
             environment=Environment.PROD
         )
@@ -216,13 +287,14 @@ async def run_trader():
     kalshi_ids = [m["kalshi"] for m in MARKET_MAPPING.values() if "kalshi" in m]
     
     poly_ws = PolymarketWSS(
-        uri=POLYMARKET_MARKET_WSS_URI,
+        uri=POLYMARKET_WSS_URI,
         asset_ids=poly_ids,
-        message_queue=message_queue
+        message_queue=message_queue,
+        auth=AUTH
     )
     
     kalshi_ws = KalshiWSS(
-        key_id=os.getenv('PROD_KEYID'),
+        key_id=PROD_KEYID,
         private_key=kalshi_client.private_key,
         environment=Environment.PROD,
         message_queue=message_queue,
@@ -235,6 +307,7 @@ async def run_trader():
 
         await poly_ws.connect()
         poly_listen_task = asyncio.create_task(poly_ws.listen())
+
 
         queue_processor_task = asyncio.create_task(process_messages_from_queue(message_queue))
         

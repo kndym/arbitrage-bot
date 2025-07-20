@@ -5,6 +5,7 @@ import logging
 import time
 from typing import Optional, Any, Dict
 import os
+import pprint as pp
 
 # Import client libraries and types
 from kalshi.clients import KalshiHttpClient
@@ -124,22 +125,46 @@ async def execute_kalshi_trade(
         logger.error(f"An error occurred during the Kalshi transaction: {e}", exc_info=True)
         return None
 
-# --- New Complimentary Arbitrage Execution Logic ---
+
+async def blank():
+    pass
+
+async def find_polymarket_trade(
+    client: ClobClient, order_id: str, proxies: dict
+) -> Optional[Dict[str, Any]]:
+
+    try:
+        os.environ['HTTP_PROXY'] = proxies['http']
+        os.environ['HTTPS_PROXY'] = proxies['https']
+    
+        order = client.get_order(order_id)
+        print('ORDER FIND: ')
+        pp.pprint(order)
+        return order
+            
+    except Exception as e:
+        logger.error(f"An error occurred during the Polymarket transaction: {e}", exc_info=True)
+        return None
+    finally:
+        if 'HTTP_PROXY' in os.environ:
+            del os.environ['HTTP_PROXY']
+        if 'HTTPS_PROXY' in os.environ:
+            del os.environ['HTTPS_PROXY']
 
 async def execute_complimentary_buy_trade(
     poly_client: Optional[ClobClient], kalshi_client: Optional[KalshiHttpClient],
-    canonical_name: str,
-    book1_platform: str, book1_market_id: str, book1_price: float,
-    book2_platform: str, book2_market_id: str, book2_price: float,
+    canonical_name_1: str, canonical_name_2: str,
+    book1_platform: str, book1_market_id: str, book1_ask: float, book1_bid: float,
+    book2_platform: str, book2_market_id: str, book2_ask: float, book2_bid: float,
     trade_size: int, proxies: dict
 ):
     """
     Coordinates the two BUY legs of the complimentary arbitrage trade and handles failures.
     """
     logger.info(
-        f"--- ATTEMPTING COMPLIMENTARY ARBITRAGE for {canonical_name} ---\n"
-        f"  - BUY {trade_size} on {book1_platform} @ {book1_price:.4f}\n"
-        f"  - BUY {trade_size} on {book2_platform} @ {book2_price:.4f}"
+        f"--- ATTEMPTING COMPLIMENTARY ARBITRAGE for {canonical_name_1} and {canonical_name_2} ---\n"
+        f"  - BUY {trade_size} on {book1_platform} @ {book1_ask:.4f}\n"
+        f"  - BUY {trade_size} on {book2_platform} @ {book2_ask:.4f}"
     )
 
     tasks = {}
@@ -147,12 +172,13 @@ async def execute_complimentary_buy_trade(
     # Define the tasks for the two buy orders
     platforms = [book1_platform, book2_platform]
     market_ids = [book1_market_id, book2_market_id]
-    prices = [book1_price, book2_price]
+    prices = [book1_ask, book2_ask]
     
     for i, platform in enumerate(platforms):
         if platform == "Polymarket":
-            tasks[i] = execute_polymarket_trade(poly_client, market_ids[i], prices[i], trade_size, BUY, OrderType.FOK, proxies)
+            tasks[i] = execute_polymarket_trade(poly_client, market_ids[i], prices[i], trade_size, BUY, OrderType.FAK, proxies)
         elif platform == "Kalshi":
+            #tasks[i]=blank()
             # For complimentary markets, we are always buying a "yes" contract on one outcome and a "yes" on the other.
             # If your market mapping involves 'no' markets on Kalshi, you would need to adjust the is_yes flag based on that.
             tasks[i] = execute_kalshi_trade(kalshi_client, market_ids[i], 'buy', prices[i], trade_size, is_fok=True, is_yes=True)
@@ -162,38 +188,47 @@ async def execute_complimentary_buy_trade(
     result1 = results[0]
     result2 = results[1]
 
+
+
     def is_trade_successful(platform, result):
+        global poly_id
         if not result:
             return False
         if platform == "Polymarket":
+            poly_id=result.get('orderID')
             return result.get('success') is True
         elif platform == "Kalshi":
             # Successful Kalshi order has an 'order' object and status is not 'CANCELED' or 'FAILED'
             return "order" in result and result['order'].get('status') not in ['CANCELED', 'FAILED']
         return False
-
+    
     success1 = is_trade_successful(book1_platform, result1)
     success2 = is_trade_successful(book2_platform, result2)
+
+    await find_polymarket_trade(client=poly_client, order_id=poly_id, proxies=proxies)
+    print(poly_id)
 
     # --- Reversal Logic ---
     # Important: If one trade succeeds and the other fails, we must reverse the successful trade to avoid exposure.
     if success1 and not success2:
-        logger.warning(f"[{canonical_name}] Buy on {book1_platform} SUCCEEDED but buy on {book2_platform} FAILED. Reversing first leg.")
-        if book1_platform == "Polymarket":
-            # Sell the contracts we just bought. Using a non-FOK order to increase chance of fill.
-            await execute_polymarket_trade(poly_client, book1_market_id, book1_price, trade_size, SELL, OrderType.FAK, proxies)
-        else: # Kalshi
-            await execute_kalshi_trade(kalshi_client, book1_market_id, 'sell', book1_price, trade_size, is_fok=False, is_yes=True)
+        logger.warning(f"[{canonical_name_1} / {canonical_name_2}] Buy on {book1_platform} SUCCEEDED but buy on {book2_platform} FAILED. Reversing first leg.")
+        if False:
+            if book1_platform == "Polymarket":
+                # Sell the contracts we just bought. Using a non-FOK order to increase chance of fill.
+                await execute_polymarket_trade(poly_client, book1_market_id, book1_bid, trade_size, SELL, OrderType.FAK, proxies)
+            else: # Kalshi
+                await execute_kalshi_trade(kalshi_client, book1_market_id, 'sell', book1_bid, trade_size, is_fok=False, is_yes=True)
 
     elif not success1 and success2:
-        logger.warning(f"[{canonical_name}] Buy on {book2_platform} SUCCEEDED but buy on {book1_platform} FAILED. Reversing second leg.")
-        if book2_platform == "Polymarket":
-            await execute_polymarket_trade(poly_client, book2_market_id, book2_price, trade_size, SELL, OrderType.FAK, proxies)
-        else: # Kalshi
-            await execute_kalshi_trade(kalshi_client, book2_market_id, 'sell', book2_price, trade_size, is_fok=False, is_yes=True)
-            
+        logger.warning(f"[{canonical_name_1} / {canonical_name_2}] Buy on {book2_platform} SUCCEEDED but buy on {book1_platform} FAILED. Reversing second leg.")
+        if False:
+            if book2_platform == "Polymarket":
+                await execute_polymarket_trade(poly_client, book2_market_id, book2_bid, trade_size, SELL, OrderType.FAK, proxies)
+            else: # Kalshi
+                await execute_kalshi_trade(kalshi_client, book2_market_id, 'sell', book2_bid, trade_size, is_fok=False, is_yes=True)
+                
     elif success1 and success2:
-        logger.info(f"[{canonical_name}] Complimentary arbitrage trade successfully executed on both legs.")
+        logger.info(f"[{canonical_name_1} / {canonical_name_2}] Complimentary arbitrage trade successfully executed on both legs.")
     
     else:
-        logger.error(f"[{canonical_name}] Both legs of the complimentary arbitrage trade failed.")
+        logger.error(f"[{canonical_name_1} / {canonical_name_2}] Both legs of the complimentary arbitrage trade failed.")

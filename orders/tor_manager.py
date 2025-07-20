@@ -3,6 +3,8 @@ import os
 import stem.process
 import re
 import urllib.request
+import requests 
+import datetime
 
 def start_tor(depth=0):
     """
@@ -65,3 +67,31 @@ def stop_tor(tor_process):
         print("[INFO] Stopping Tor process...")
         tor_process.kill()
         print("[SUCCESS] Tor process stopped.")
+
+def ping_tor(proxies):
+    """
+    Tests the Tor connection by making a request through the Tor SOCKS proxy
+    and checking the returned IP address and ping time.
+    """
+    print("[INFO] Testing Tor connection and getting ping time...")
+    try:
+        # Using a service that returns the public IP address
+        # ip-api.com is a good option for this purpose.
+        start_time = datetime.datetime.now() # Record start time for manual timing if needed
+        response = requests.get("http://ip-api.com/json/", proxies=proxies, timeout=10)
+        response.raise_for_status()  # Raise an HTTPError for bad responses (4xx or 5xx)
+        end_time = datetime.datetime.now() # Record end time
+
+        data = response.json()
+        tor_ip = data.get("query")
+        tor_country = data.get("country")
+
+        # Get the elapsed time using response.elapsed
+        ping_time_elapsed = response.elapsed.total_seconds() * 1000  # Convert to milliseconds [3]
+
+        print(f"[INFO] Request made through Tor. IP: {tor_ip}, Country: {tor_country}, Ping: {ping_time_elapsed:.2f} ms")
+
+        return True, tor_ip, tor_country, ping_time_elapsed
+    except requests.exceptions.RequestException as e:
+        print(f"[ERROR] Tor connection test failed: {e}")
+        return False, None, None, None
