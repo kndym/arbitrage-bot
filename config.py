@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Updated to use the newer JSON files provided in the prompt
-MARKETS_FILE='jsons/markets_07_19.json'
-COMP_FILE='jsons/compliment_07_19.json'
+MARKETS_FILE='jsons/markets_07_21.json'
+COMP_FILE='jsons/compliment_07_21.json'
 
 RUN_DURATION_MINUTES = 5
 OUTPUT_FILE_NAME = "order_book_snapshot_7_19.txt"

@@ -43,7 +43,7 @@ import sys
 # Get a logger instance (you can also use logging.getLogger(__name__) for specific modules)
 logger = logging.getLogger(__name__) 
 
-file_log_handler = logging.FileHandler('7_19_v3.log')
+file_log_handler = logging.FileHandler('7_21_v1.log')
 logger.addHandler(file_log_handler)
 
 stderr_log_handler = logging.StreamHandler()
@@ -219,17 +219,11 @@ async def process_messages_from_queue(queue: asyncio.Queue):
 async def run_trader():
     """Main function to start Tor, initialize clients, and listen to websockets."""
     global polymarket_client, kalshi_client, PROXIES
+    PROXIES=None
 
-    tor_process, PROXIES = start_tor()
-    if not tor_process:
-        logger.error("Failed to start Tor. Exiting.")
-        return
-    ping_tor(PROXIES)
 
     try:
         logger.info("Temporarily setting proxy environment variables for ClobClient initialization...")
-        os.environ['HTTP_PROXY'] = PROXIES['http']
-        os.environ['HTTPS_PROXY'] = PROXIES['https']
 
         poly_client = ClobClient(
             host="https://clob.polymarket.com",
@@ -278,7 +272,6 @@ async def run_trader():
 
     if not polymarket_client or not kalshi_client:
         logger.error("Could not initialize all trading clients. Shutting down.")
-        stop_tor(tor_process)
         return
 
     message_queue = asyncio.Queue()
@@ -318,8 +311,6 @@ async def run_trader():
             queue_processor_task
         )
     finally:
-        logger.info("Stopping Tor process...")
-        stop_tor(tor_process)
         logger.info("Shutdown complete.")
 
 if __name__ == "__main__":

@@ -68,7 +68,7 @@ def stop_tor(tor_process):
         tor_process.kill()
         print("[SUCCESS] Tor process stopped.")
 
-def ping_tor(proxies):
+def ping_tor(proxies=None):
     """
     Tests the Tor connection by making a request through the Tor SOCKS proxy
     and checking the returned IP address and ping time.
@@ -95,3 +95,6 @@ def ping_tor(proxies):
     except requests.exceptions.RequestException as e:
         print(f"[ERROR] Tor connection test failed: {e}")
         return False, None, None, None
+    
+
+ping_tor()

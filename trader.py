@@ -37,10 +37,8 @@ async def execute_polymarket_trade(
         The API response dictionary on success, None on failure.
     """
     try:
-        os.environ['HTTP_PROXY'] = proxies['http']
-        os.environ['HTTPS_PROXY'] = proxies['https']
     
-        order_args = OrderArgs(side=side, token_id=market_id, price=price, size=float(size))
+        order_args = OrderArgs(side=side, token_id=market_id, price=price+0.01, size=float(size))
         logger.info(f"Creating Polymarket order: {side} {size} of {market_id} @ {price}")
         signed_order = client.create_order(order_args)
         
@@ -134,8 +132,6 @@ async def find_polymarket_trade(
 ) -> Optional[Dict[str, Any]]:
 
     try:
-        os.environ['HTTP_PROXY'] = proxies['http']
-        os.environ['HTTPS_PROXY'] = proxies['https']
     
         order = client.get_order(order_id)
         print('ORDER FIND: ')
@@ -176,7 +172,7 @@ async def execute_complimentary_buy_trade(
     
     for i, platform in enumerate(platforms):
         if platform == "Polymarket":
-            tasks[i] = execute_polymarket_trade(poly_client, market_ids[i], prices[i], trade_size, BUY, OrderType.FAK, proxies)
+            tasks[i] = execute_polymarket_trade(poly_client, market_ids[i], prices[i], trade_size, BUY, OrderType.GTC, proxies)
         elif platform == "Kalshi":
             #tasks[i]=blank()
             # For complimentary markets, we are always buying a "yes" contract on one outcome and a "yes" on the other.

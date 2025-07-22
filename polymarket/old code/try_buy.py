@@ -27,9 +27,9 @@ client.set_api_creds(client.create_or_derive_api_creds())
 
 order_args = OrderArgs(
     side=BUY,
-    token_id="68981407591275819355155557897174725090207140821614494691529013059207415432892",
-    size=1.0, # $$$
-    price=0.54
+    token_id="41514409204811681957297914647439181721960830322421349815421512981934146077920",
+    size=6.0, # $$$
+    price=0.19
 )
 
 
